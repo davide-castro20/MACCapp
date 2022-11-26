@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "949733210787",
+    "project_id": "maccapp-41dd6",
+    "storage_bucket": "maccapp-41dd6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:949733210787:android:3dbb8ea39246eac9415d16",
+        "android_client_info": {
+          "package_name": "com.maccapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "949733210787-qek8bds7pndka29t05ml4qq5d35epmat.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsYtVnohzlPt1pFyaX8nPsC84zunCpo64"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "949733210787-qek8bds7pndka29t05ml4qq5d35epmat.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

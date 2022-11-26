@@ -8,94 +8,146 @@
  * @format
  */
 
-import React, {type PropsWithChildren} from 'react';
+import React, { type PropsWithChildren, useState, useEffect } from 'react';
 import {
   SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
-  Text,
+  // Text,
   useColorScheme,
   View,
+  TextInput,
+  ActivityIndicator,
 } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
-const Section: React.FC<
-  PropsWithChildren<{
-    title: string;
-  }>
-> = ({children, title}) => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+import {
+  createTheme,
+  useThemeMode,
+  ThemeProvider,
+  Text,
+  Button,
+  Image,
+  makeStyles,
+} from '@rneui/themed';
+
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+
+// const Section: React.FC<
+//   PropsWithChildren<{
+//     title: string;
+//   }>
+// > = ({children, title}) => {
+//   const isDarkMode = useColorScheme() === 'dark';
+//   return (
+//     <View style={styles.sectionContainer}>
+//       <Text
+//         style={[
+//           styles.sectionTitle,
+//           {
+//             color: isDarkMode ? Colors.white : Colors.black,
+//           },
+//         ]}>
+//         {title}
+//       </Text>
+//       <Text
+//         style={[
+//           styles.sectionDescription,
+//           {
+//             color: isDarkMode ? Colors.light : Colors.dark,
+//           },
+//         ]}>
+//         {children}
+//       </Text>
+//     </View>
+//   );
+// };
+
+const theme = createTheme({
+  mode: 'dark',
+  components: {
+    Button: {
+      radius: 'sm',
+    },
+  },
+});
+
+
 
 const App = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+  // Set an initializing state whilst Firebase connects
+  const [initializing, setInitializing] = useState(true);
+  const [user, setUser] = useState<FirebaseAuthTypes.User>();
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [loadingPosts, setLoadingPosts] = useState(true);
+  const [posts, setPosts] = useState([]);
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  // Handle user state changes
+  function onAuthStateChanged(user: any) {
+    setUser(user);
+    if (initializing) setInitializing(false);
+  }
+
+  const userLogin = () => {
+    if (email == "" || password == "") 
+      return;
+
+    auth().signInWithEmailAndPassword(email, password)
+    .catch(error => {
+      console.log(error)
+    });
   };
 
+  useEffect(() => {
+    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    return subscriber; // unsubscribe on unmount
+  }, []);
+
+  useEffect(() => {
+
+  });
+
+  if (initializing) return null;
+
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+    <ThemeProvider theme={theme}>
+      
+      { !user ?
+      <View>
+        <View style={styles.inputView}>
+          <TextInput
+            style={styles.textInput}
+            placeholder="Email."
+            placeholderTextColor="#003f5c"
+            onChangeText={(email) => setEmail(email)} />
         </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+        <View style={styles.inputView}>
+          <TextInput
+            style={styles.textInput}
+            placeholder="Password."
+            placeholderTextColor="#003f5c"
+            secureTextEntry={true}
+            onChangeText={(password) => setPassword(password)} />
+          </View><Button type="solid" title="Login" onPress={userLogin} />
+      </View>
+      :
+      <View>
+        <Text style={styles.sectionTitle}>
+          Welcome {user.email}
+        </Text>
+        { loadingPosts ?
+          <ActivityIndicator/>
+          :
+          <ScrollView>
+
+          </ScrollView>
+        }
+      </View>
+      }
+    </ThemeProvider>);
 };
 
 const styles = StyleSheet.create({
@@ -114,6 +166,19 @@ const styles = StyleSheet.create({
   },
   highlight: {
     fontWeight: '700',
+  },
+  box: {
+
+  },
+  textInput: {
+
+  },
+  inputView: {
+    borderRadius: 30,
+    width: "70%",
+    height: 45,
+    marginBottom: 20,
+    alignItems: "center",
   },
 });
 
