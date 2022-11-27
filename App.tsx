@@ -41,8 +41,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 
-import PostList from './src/components/PostList';
-
 import styles from './src/styles/style';
 
 import HomeScreen from './src/screens/home';

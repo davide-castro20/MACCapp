@@ -15,8 +15,6 @@ import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
 
-import PostList from '../../src/components/PostList';
-
 import styles from '../../src/styles/style';
 
 const HomeScreen = (props) => {
@@ -33,30 +31,36 @@ const HomeScreen = (props) => {
         getPosts(props.user);
     }, []);
 
-    function getPosts(user: any) {
+    async function getPosts(user: any) {
         if (!user) return;
 
         setLoadingPosts(true);
+
 
         return firestore()
             .collection('posts')
             .where('creator', '==', user.uid)
             .onSnapshot(postsSnapshot => {
-                setPosts([]);
+                let newPosts = [];
+                let postPromises = [];
+
                 postsSnapshot.forEach(postSnap => {
                     let postData = postSnap.data();
+                    postPromises.push(
                     firestore()
                         .collection('users')
                         .doc(postData.creator)
                         .get()
                         .then(postCreator => {
-                            console.log(postCreator.data());
                             postData.creator = postCreator.data();
-                            setPosts([...posts, postData]);
-                        });
+                            newPosts = [...newPosts, postData];
+                        }));
                 });
-                console.log(posts);
-                setLoadingPosts(false);
+
+                Promise.all(postPromises).then(() => {
+                    setPosts(newPosts);
+                    setLoadingPosts(false); 
+                })
             });
     }
 
@@ -64,7 +68,6 @@ const HomeScreen = (props) => {
 
     const renderPost = (post) => {
         let photo = post.item.creator.photoURL == null ? "" : post.item.creator.photoURL;
-        console.log(photo)
         return (
             <ListItem bottomDivider >
                 <Avatar source={{uri: photo}} rounded={true}/>
