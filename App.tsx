@@ -8,7 +8,7 @@
  * @format
  */
 
-import React, { type PropsWithChildren, useState, useEffect } from 'react';
+import React, {type PropsWithChildren, useState, useEffect} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -21,7 +21,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 
-import { Colors } from 'react-native/Libraries/NewAppScreen';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
 
 import {
   createTheme,
@@ -34,10 +34,10 @@ import {
   ListItem,
 } from '@rneui/themed';
 
-import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
-import PostList from "./src/components/PostList";
+import PostList from './src/components/PostList';
 
 // const Section: React.FC<
 //   PropsWithChildren<{
@@ -78,39 +78,44 @@ const theme = createTheme({
   },
 });
 
-
-
 const App = () => {
   // Set an initializing state whilst Firebase connects
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState<FirebaseAuthTypes.User>();
   const [userData, setUserData] = useState();
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [loadingUser, setLoadingUser] = useState(true);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [posts, setPosts] = useState([]);
 
-  function getPosts(user) {
+  function getPosts(user: any) {
     if (!user) return;
 
     setLoadingPosts(true);
 
-    return firestore().collection('posts').where('creator', '==', user.uid).onSnapshot((postsSnapshot) => {
-      setPosts([]);
-      postsSnapshot.forEach(postSnap => {
-        let postData = postSnap.data();
-        firestore().collection('users').doc(postData.creator).get().then((postCreator) => {
-          console.log(postCreator.data())
-          postData.creator = auth().currentUser;
-          postData.creatorData = postCreator.data();
-          console.log(postData)
-          setPosts([...posts, postData]);
-        })
+    return firestore()
+      .collection('posts')
+      .where('creator', '==', user.uid)
+      .onSnapshot(postsSnapshot => {
+        setPosts([]);
+        postsSnapshot.forEach(postSnap => {
+          let postData = postSnap.data();
+          firestore()
+            .collection('users')
+            .doc(postData.creator)
+            .get()
+            .then(postCreator => {
+              console.log(postCreator.data());
+              postData.creator = postData.creator;
+              postData.creatorData = postCreator.data();
+              console.log(postData);
+              setPosts([...posts, postData]);
+            });
+        });
+        console.log(posts);
+        setLoadingPosts(false);
       });
-      console.log(posts);
-      setLoadingPosts(false);
-    });
   }
 
   // Handle user state changes
@@ -122,72 +127,81 @@ const App = () => {
   }
 
   function getUserData(user: any) {
-    firestore().collection('users').doc(user.uid).get().then(userData => {
-      setUserData(userData.data());
-      setLoadingUser(false);
-    });
+    if (!user) return;
 
+    firestore()
+      .collection('users')
+      .doc(user.uid)
+      .get()
+      .then(userData => {
+        console.log(userData)
+        setUserData(userData.data());
+        setLoadingUser(false);
+      });
   }
 
   const userLogin = () => {
-    if (email == "" || password == "") 
-      return;
+    if (email == '' || password == '') return;
 
-    auth().signInWithEmailAndPassword(email, password).then( (user) => {
+    auth()
+      .signInWithEmailAndPassword(email, password)
+      .then(user => {
         getUserData(user);
-        console.log("wow")
-      }
-    )
-    .catch(error => {
-      console.log(error)
-    });
+      })
+      .catch(error => {
+        console.log(error);
+      });
   };
 
   useEffect(() => {
-    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-    return subscriber; // unsubscribe on unmount
+    const unsubscribe = auth().onAuthStateChanged(onAuthStateChanged);
   }, []);
 
   if (initializing) return null;
 
   return (
     <ThemeProvider theme={theme}>
-      
-      { !user ?
-      <View>
-        <View style={styles.inputView}>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Email."
-            placeholderTextColor="#003f5c"
-            onChangeText={(email) => setEmail(email)} />
+      {!user ? (
+        <View>
+          <View style={styles.inputView}>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Email."
+              placeholderTextColor="#003f5c"
+              onChangeText={email => setEmail(email)}
+            />
+          </View>
+          <View style={styles.inputView}>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Password."
+              placeholderTextColor="#003f5c"
+              secureTextEntry={true}
+              onChangeText={password => setPassword(password)}
+            />
+          </View>
+          <Button type="solid" title="Login" onPress={userLogin} />
         </View>
-        <View style={styles.inputView}>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Password."
-            placeholderTextColor="#003f5c"
-            secureTextEntry={true}
-            onChangeText={(password) => setPassword(password)} />
-          </View><Button type="solid" title="Login" onPress={userLogin} />
-      </View>
-      :
-      <View>
-        { userData &&
-        <Text style={styles.sectionTitle}>
-          Welcome { userData.firstName } { userData.lastName }
-        </Text>
-        }
-        { loadingPosts ?
-          <ActivityIndicator/>
-          :
-          // <ScrollView>
-            <PostList posts={posts}/>
-          // </ScrollView>
-        }
-      </View>
-      }
-    </ThemeProvider>);
+      ) : (
+        <View>
+          {userData && (
+            <Text style={styles.sectionTitle}>
+              Welcome {userData.firstName} {userData.lastName}
+            </Text>
+          )}
+          {
+            loadingPosts ? (
+              <ActivityIndicator />
+            ) : (
+              // <ScrollView>
+              <PostList posts={posts} />
+            )
+            // </ScrollView>
+          }
+        </View>
+      )}
+    </ThemeProvider>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -207,18 +221,14 @@ const styles = StyleSheet.create({
   highlight: {
     fontWeight: '700',
   },
-  box: {
-
-  },
-  textInput: {
-
-  },
+  box: {},
+  textInput: {},
   inputView: {
     borderRadius: 30,
-    width: "70%",
+    width: '70%',
     height: 45,
     marginBottom: 20,
-    alignItems: "center",
+    alignItems: 'center',
   },
 });
 
