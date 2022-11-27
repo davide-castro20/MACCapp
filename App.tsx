@@ -8,7 +8,7 @@
  * @format
  */
 
-import React, {type PropsWithChildren, useState, useEffect} from 'react';
+import React, { type PropsWithChildren, useState, useEffect } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -21,7 +21,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 
-import {Colors} from 'react-native/Libraries/NewAppScreen';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 import {
   createTheme,
@@ -34,40 +34,22 @@ import {
   ListItem,
 } from '@rneui/themed';
 
-import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
 
 import PostList from './src/components/PostList';
 
-// const Section: React.FC<
-//   PropsWithChildren<{
-//     title: string;
-//   }>
-// > = ({children, title}) => {
-//   const isDarkMode = useColorScheme() === 'dark';
-//   return (
-//     <View style={styles.sectionContainer}>
-//       <Text
-//         style={[
-//           styles.sectionTitle,
-//           {
-//             color: isDarkMode ? Colors.white : Colors.black,
-//           },
-//         ]}>
-//         {title}
-//       </Text>
-//       <Text
-//         style={[
-//           styles.sectionDescription,
-//           {
-//             color: isDarkMode ? Colors.light : Colors.dark,
-//           },
-//         ]}>
-//         {children}
-//       </Text>
-//     </View>
-//   );
-// };
+import styles from './src/styles/style';
+
+import HomeScreen from './src/screens/home';
+import CreatePostScreen from './src/screens/createPost';
+
+import { Avatar, Icon } from '@rneui/base';
+
 
 const theme = createTheme({
   mode: 'dark',
@@ -78,7 +60,10 @@ const theme = createTheme({
   },
 });
 
+const Stack = createNativeStackNavigator();
+
 const App = () => {
+
   // Set an initializing state whilst Firebase connects
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState<FirebaseAuthTypes.User>();
@@ -86,44 +71,12 @@ const App = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [loadingUser, setLoadingUser] = useState(true);
-  const [loadingPosts, setLoadingPosts] = useState(true);
-  const [posts, setPosts] = useState([]);
-
-  function getPosts(user: any) {
-    if (!user) return;
-
-    setLoadingPosts(true);
-
-    return firestore()
-      .collection('posts')
-      .where('creator', '==', user.uid)
-      .onSnapshot(postsSnapshot => {
-        setPosts([]);
-        postsSnapshot.forEach(postSnap => {
-          let postData = postSnap.data();
-          firestore()
-            .collection('users')
-            .doc(postData.creator)
-            .get()
-            .then(postCreator => {
-              console.log(postCreator.data());
-              postData.creator = postData.creator;
-              postData.creatorData = postCreator.data();
-              console.log(postData);
-              setPosts([...posts, postData]);
-            });
-        });
-        console.log(posts);
-        setLoadingPosts(false);
-      });
-  }
 
   // Handle user state changes
   function onAuthStateChanged(user: any) {
     setUser(user);
-    if (initializing) setInitializing(false);
     if (loadingUser) getUserData(user);
-    getPosts(user);
+    if (initializing) setInitializing(false);
   }
 
   function getUserData(user: any) {
@@ -160,76 +113,79 @@ const App = () => {
   if (initializing) return null;
 
   return (
-    <ThemeProvider theme={theme}>
-      {!user ? (
-        <View>
-          <View style={styles.inputView}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Email."
-              placeholderTextColor="#003f5c"
-              onChangeText={email => setEmail(email)}
-            />
+    <NavigationContainer>
+      <ThemeProvider theme={theme}>
+        {!user ? (
+          <View>
+            <View style={styles.inputView}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Email."
+                placeholderTextColor="#003f5c"
+                onChangeText={email => setEmail(email)}
+              />
+            </View>
+            <View style={styles.inputView}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Password."
+                placeholderTextColor="#003f5c"
+                secureTextEntry={true}
+                onChangeText={password => setPassword(password)}
+              />
+            </View>
+            <Button type="solid" title="Login" onPress={userLogin} />
           </View>
-          <View style={styles.inputView}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Password."
-              placeholderTextColor="#003f5c"
-              secureTextEntry={true}
-              onChangeText={password => setPassword(password)}
-            />
-          </View>
-          <Button type="solid" title="Login" onPress={userLogin} />
-        </View>
-      ) : (
-        <View>
-          {userData && (
-            <Text style={styles.sectionTitle}>
-              Welcome {userData.firstName} {userData.lastName}
-            </Text>
-          )}
-          {
-            loadingPosts ? (
-              <ActivityIndicator />
-            ) : (
-              // <ScrollView>
-              <PostList posts={posts} />
+        ) :
+          (
+            userData ? (
+              <Stack.Navigator>
+                <Stack.Screen name="Home" children={() => <HomeScreen user={user} />}
+                  options={({navigation}) => ({
+                    headerTitle: "Timeline",
+                    headerLeft: () => (
+                      <Avatar
+                        source={{ uri: userData.photoURL }}
+                        rounded={true}
+                        size={40}
+                        onPress={() => { alert('user settings'); }}
+                      />
+                    ),
+                    headerRight: () => (
+                      <Icon reverse
+                      size={20}
+                      name='pen-nib'
+                      type='font-awesome-5'
+                      onPress={ () => navigation.push("CreatePost") }
+                      />
+                    ),
+                  })} />
+                <Stack.Screen name="CreatePost" children={() => <CreatePostScreen user={user} />}
+                  options={({navigation}) => ({
+                    headerTitle: "Create Post",
+                    headerLeft: () => (
+                      <Icon reverse
+                        size={20}
+                        name='arrow-left'
+                        type='font-awesome-5'
+                        onPress={ () => navigation.goBack() }
+                      />
+                    ),
+                  })} />
+              </Stack.Navigator>
             )
-            // </ScrollView>
-          }
-        </View>
-      )}
-    </ThemeProvider>
+
+              :
+              <ActivityIndicator />
+          )
+        }
+
+
+      </ThemeProvider>
+    </NavigationContainer>
   );
 };
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  box: {},
-  textInput: {},
-  inputView: {
-    borderRadius: 30,
-    width: '70%',
-    height: 45,
-    marginBottom: 20,
-    alignItems: 'center',
-  },
-});
+
 
 export default App;
