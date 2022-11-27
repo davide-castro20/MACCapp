@@ -31,9 +31,13 @@ import {
   Button,
   Image,
   makeStyles,
+  ListItem,
 } from '@rneui/themed';
 
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+
+import PostList from "./src/components/PostList";
 
 // const Section: React.FC<
 //   PropsWithChildren<{
@@ -80,22 +84,60 @@ const App = () => {
   // Set an initializing state whilst Firebase connects
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState<FirebaseAuthTypes.User>();
+  const [userData, setUserData] = useState();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [loadingUser, setLoadingUser] = useState(true);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [posts, setPosts] = useState([]);
+
+  function getPosts(user) {
+    if (!user) return;
+
+    setLoadingPosts(true);
+
+    return firestore().collection('posts').where('creator', '==', user.uid).onSnapshot((postsSnapshot) => {
+      setPosts([]);
+      postsSnapshot.forEach(postSnap => {
+        let postData = postSnap.data();
+        firestore().collection('users').doc(postData.creator).get().then((postCreator) => {
+          console.log(postCreator.data())
+          postData.creator = auth().currentUser;
+          postData.creatorData = postCreator.data();
+          console.log(postData)
+          setPosts([...posts, postData]);
+        })
+      });
+      console.log(posts);
+      setLoadingPosts(false);
+    });
+  }
 
   // Handle user state changes
   function onAuthStateChanged(user: any) {
     setUser(user);
     if (initializing) setInitializing(false);
+    if (loadingUser) getUserData(user);
+    getPosts(user);
+  }
+
+  function getUserData(user: any) {
+    firestore().collection('users').doc(user.uid).get().then(userData => {
+      setUserData(userData.data());
+      setLoadingUser(false);
+    });
+
   }
 
   const userLogin = () => {
     if (email == "" || password == "") 
       return;
 
-    auth().signInWithEmailAndPassword(email, password)
+    auth().signInWithEmailAndPassword(email, password).then( (user) => {
+        getUserData(user);
+        console.log("wow")
+      }
+    )
     .catch(error => {
       console.log(error)
     });
@@ -105,10 +147,6 @@ const App = () => {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
     return subscriber; // unsubscribe on unmount
   }, []);
-
-  useEffect(() => {
-
-  });
 
   if (initializing) return null;
 
@@ -135,15 +173,17 @@ const App = () => {
       </View>
       :
       <View>
+        { userData &&
         <Text style={styles.sectionTitle}>
-          Welcome {user.email}
+          Welcome { userData.firstName } { userData.lastName }
         </Text>
+        }
         { loadingPosts ?
           <ActivityIndicator/>
           :
-          <ScrollView>
-
-          </ScrollView>
+          // <ScrollView>
+            <PostList posts={posts}/>
+          // </ScrollView>
         }
       </View>
       }
