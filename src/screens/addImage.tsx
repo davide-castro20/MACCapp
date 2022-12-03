@@ -7,6 +7,7 @@ import {
     ActivityIndicator,
     RefreshControl,
     ScrollView,
+    useWindowDimensions,
 } from 'react-native';
 
 import { Button } from '@rneui/themed';
@@ -30,6 +31,8 @@ const AddImageScreen = (prop: any) => {
         }
         	
     }, []);
+
+    const {width} = useWindowDimensions();
 
     return (
         <View>
@@ -57,6 +60,7 @@ const AddImageScreen = (prop: any) => {
                     <Image
                         resizeMode="cover"
                         resizeMethod="scale"
+                        style={{height: width}}
                         source={{uri: uri}}
                     />
                     </View>
