@@ -40,11 +40,13 @@ import firestore from '@react-native-firebase/firestore';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
+import { useNavigation } from '@react-navigation/native';
 
 import styles from './src/styles/style';
 
 import HomeScreen from './src/screens/home';
 import CreatePostScreen from './src/screens/createPost';
+import AddImageScreen from './src/screens/addImage';
 
 import { Avatar, Icon } from '@rneui/base';
 
@@ -65,7 +67,7 @@ const App = () => {
   // Set an initializing state whilst Firebase connects
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState<FirebaseAuthTypes.User>();
-  const [userData, setUserData] = useState();
+  const [userData, setUserData] = useState<any>();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [loadingUser, setLoadingUser] = useState(true);
@@ -146,7 +148,7 @@ const App = () => {
                         source={{ uri: userData.photoURL }}
                         rounded={true}
                         size={40}
-                        onPress={() => { alert('user settings'); }}
+                        onPress={() => { /* TODO: side menu with profile and options */ }}
                       />
                     ),
                     headerRight: () => (
@@ -158,9 +160,21 @@ const App = () => {
                       />
                     ),
                   })} />
-                <Stack.Screen name="CreatePost" children={() => <CreatePostScreen user={user} />}
+                <Stack.Screen name="CreatePost" children={() => <CreatePostScreen navigation={useNavigation()}/*TODO: rever isto*/ user={user} />}
                   options={({navigation}) => ({
                     headerTitle: "Create Post",
+                    headerLeft: () => (
+                      <Icon reverse
+                        size={20}
+                        name='arrow-left'
+                        type='font-awesome-5'
+                        onPress={ () => navigation.goBack() }
+                      />
+                    ),
+                  })} />
+                <Stack.Screen name="AddImage" component={AddImageScreen}
+                  options={({navigation}) => ({
+                    headerTitle: "Add Image",
                     headerLeft: () => (
                       <Icon reverse
                         size={20}

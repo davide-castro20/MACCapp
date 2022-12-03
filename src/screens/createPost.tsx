@@ -16,7 +16,8 @@ import firestore from '@react-native-firebase/firestore';
 
 import styles from '../../src/styles/style';
 
-const CreatePostScreen = (props) => {
+
+const CreatePostScreen = (props: any) => {
 
     const [postText, setPostText] = useState("");
     const [postTags, setPostTags] = useState("");
@@ -66,7 +67,11 @@ const CreatePostScreen = (props) => {
             {
                 !creatingPost ? (
 
-                    <Button type="solid" title="Create" onPress={createPost} />
+                    <View>
+                        <Button type="solid" title="Add Image" onPress={() => {props.navigation.push("AddImage")}} />
+
+                        <Button type="solid" title="Create Post" onPress={createPost} />
+                    </View>
 
                 ) :
                     <ActivityIndicator />
