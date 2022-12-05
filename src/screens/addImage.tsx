@@ -14,7 +14,7 @@ import { Button } from '@rneui/themed';
 
 import React, { useState, useEffect, useCallback } from 'react';
 
-import { labelImage } from '../mlkit';
+import { labelImage, detectFaces } from '../mlkit';
 
 import * as ImagePicker from 'react-native-image-picker';
 import { CameraOptions, ImageLibraryOptions } from 'react-native-image-picker/lib/typescript/types';
@@ -34,7 +34,9 @@ const AddImageScreen = (prop: any) => {
 
     useEffect(() => {
         if (response?.assets) {
-            labelImage(response.assets[0].uri);
+            let uri = response.assets[0].uri;
+            labelImage(uri);
+            detectFaces(uri);
         }
     }, [response]);
 
