@@ -10,9 +10,13 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.WritableMap;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -33,6 +37,10 @@ import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
 import com.google.mlkit.vision.face.FaceLandmark;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
@@ -52,7 +60,7 @@ public class FaceDetectionModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void detectFaces(String uriString) {
+    public void detectFaces(String uriString, Promise promise) {
         Log.d("FaceDetection", "Uri: " + uriString);
 
         Uri uri = Uri.parse(uriString);
@@ -77,18 +85,29 @@ public class FaceDetectionModule extends ReactContextBaseJavaModule {
         Task<List<Face>> result =
                 detector.process(image)
                         .addOnSuccessListener(
-                                new OnSuccessListener<List<Face>>() {
-                                    @Override
-                                    public void onSuccess(List<Face> faces) {
-                                        for (Face face : faces) {
-                                            Rect bounds = face.getBoundingBox();
-                                            float rotY = face.getHeadEulerAngleY();  // Head is rotated to the right rotY degrees
-                                            float rotZ = face.getHeadEulerAngleZ();  // Head is tilted sideways rotZ degrees
-                                            int id = face.getTrackingId();
+                                (OnSuccessListener<List<Face>>) faces -> {
+                                    WritableArray facesArray = Arguments.createArray();
+                                    for (Face face : faces) {
+                                        Rect bounds = face.getBoundingBox();
+                                        float rotY = face.getHeadEulerAngleY();  // Head is rotated to the right rotY degrees
+                                        float rotZ = face.getHeadEulerAngleZ();  // Head is tilted sideways rotZ degrees
+                                        int id = face.getTrackingId();
 
-                                            Log.d("Face", bounds.toString());
-                                        }
+                                        Log.d("Face", bounds.toString());
+
+                                        WritableMap faceObject = Arguments.createMap();
+                                        faceObject.putInt("id", id);
+                                        faceObject.putInt("top", bounds.centerX());
+                                        faceObject.putInt("left", bounds.centerX());
+                                        faceObject.putInt("centerX", bounds.centerX());
+                                        faceObject.putInt("centerY", bounds.centerY());
+                                        faceObject.putInt("width", bounds.width());
+                                        faceObject.putInt("height", bounds.height());
+
+
+                                        facesArray.pushMap(faceObject);
                                     }
+                                    promise.resolve(facesArray);
                                 })
                         .addOnFailureListener(
                                 new OnFailureListener() {
@@ -96,6 +115,7 @@ public class FaceDetectionModule extends ReactContextBaseJavaModule {
                                     public void onFailure(@NonNull Exception e) {
                                         // Task failed with an exception
                                         // ...
+                                        promise.reject("Face recognition error", "No response");
                                     }
                                 });
     }

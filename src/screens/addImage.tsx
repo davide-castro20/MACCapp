@@ -10,6 +10,13 @@ import {
     useWindowDimensions,
 } from 'react-native';
 
+import {
+    Surface,
+    Shape,
+    Group,
+    ClippingRectangle,
+  } from '@react-native-community/art';
+
 import { Button } from '@rneui/themed';
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -36,9 +43,24 @@ const AddImageScreen = (prop: any) => {
         if (response?.assets) {
             let uri = response.assets[0].uri;
             labelImage(uri);
-            detectFaces(uri);
+            identifyFaces(uri);
         }
     }, [response]);
+
+    const identifyFaces = async (uri: string) => {
+
+        if (uri) {
+            try {
+                const facesResponse = await detectFaces(uri);
+                for (let face of facesResponse) {
+                    console.log("Face:");
+                    console.log(face);
+                }
+            } catch (error) {
+                console.log("Face recognition error");
+            }
+        }
+    };
 
     const { width } = useWindowDimensions();
 
@@ -63,18 +85,14 @@ const AddImageScreen = (prop: any) => {
                 </Button>
             ) : (
                 <View>
-                    {
-                        response?.assets.map(({ uri }: { uri: string }) => (
-                            <View key={uri}>
-                                <Image
-                                    resizeMode="cover"
-                                    resizeMethod="scale"
-                                    style={{ height: width }}
-                                    source={{ uri: uri }}
-                                />
-                            </View>
-                        ))
-                    }
+                    <View key={"selected_image"}>
+                        <Image
+                            resizeMode="cover"
+                            resizeMethod="scale"
+                            style={{ height: width }}
+                            source={{ uri: response?.assets[0].uri }}
+                        />
+                    </View>
                     <Button
                         type="solid"
                         title="Select another image"

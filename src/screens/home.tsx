@@ -7,7 +7,7 @@ import {
     RefreshControl,
 } from 'react-native';
 
-import { ListItem, Avatar } from '@rneui/themed'
+import { ListItem, Avatar, SpeedDial, Icon } from '@rneui/themed'
 
 import React, { useState, useEffect, useCallback } from 'react';
 
@@ -22,6 +22,7 @@ const HomeScreen = (props) => {
 
     const [loadingPosts, setLoadingPosts] = useState(false);
     const [posts, setPosts] = useState([]);
+    const [speedDialOpen, setSpeedDialOpen] = useState(false);
 
     useEffect(() => {
         getPosts(props.user);
@@ -47,19 +48,19 @@ const HomeScreen = (props) => {
                 postsSnapshot.forEach(postSnap => {
                     let postData = postSnap.data();
                     postPromises.push(
-                    firestore()
-                        .collection('users')
-                        .doc(postData.creator)
-                        .get()
-                        .then(postCreator => {
-                            postData.creator = postCreator.data();
-                            newPosts = [...newPosts, postData];
-                        }));
+                        firestore()
+                            .collection('users')
+                            .doc(postData.creator)
+                            .get()
+                            .then(postCreator => {
+                                postData.creator = postCreator.data();
+                                newPosts = [...newPosts, postData];
+                            }));
                 });
 
                 Promise.all(postPromises).then(() => {
                     setPosts(newPosts);
-                    setLoadingPosts(false); 
+                    setLoadingPosts(false);
                 })
             });
     }
@@ -70,8 +71,8 @@ const HomeScreen = (props) => {
         let photo = post.item.creator.photoURL == null ? "" : post.item.creator.photoURL;
         return (
             <ListItem bottomDivider >
-                <Avatar source={{uri: photo}} rounded={true}/>
-                <ListItem.Content>  
+                <Avatar source={{ uri: photo }} rounded={true} />
+                <ListItem.Content>
                     <ListItem.Title>{post.item.text}</ListItem.Title>
                     <ListItem.Subtitle>{post.item.creator.firstName} {post.item.creator.lastName}</ListItem.Subtitle>
                 </ListItem.Content>
@@ -82,7 +83,7 @@ const HomeScreen = (props) => {
 
     return (
 
-        <View>
+        <View style={{flex: 1}}>
             {
                 loadingPosts ? (
                     <ActivityIndicator />
@@ -94,14 +95,41 @@ const HomeScreen = (props) => {
                         renderItem={renderPost}
                         refreshControl={
                             <RefreshControl
-                                refreshing={ loadingPosts }
-                                onRefresh={ refreshPosts }
-                                title="Pull to refresh"/>
+                                refreshing={loadingPosts}
+                                onRefresh={refreshPosts}
+                                title="Pull to refresh" />
                         }
                     />
                 )
                 // </ScrollView>
             }
+            <SpeedDial
+                isOpen={speedDialOpen}
+                color={"#000"}
+                icon={<Icon reverse
+                    size={20}
+                    color={"#000"}
+                    iconStyle={{color: "#fff"}}
+                    name='pen-nib'
+                    type='font-awesome-5' 
+                    />}
+                openIcon={{ name: 'close', color: '#fff' }}
+                onOpen={() => setSpeedDialOpen(!speedDialOpen)}
+                onClose={() => setSpeedDialOpen(!speedDialOpen)}
+            >
+                <SpeedDial.Action
+                    color={"#000"}      
+                    icon={{ name: 'add', color: '#fff' }}
+                    title="Add"
+                    onPress={() => props.navigation.push("CreatePost")}
+                />
+                <SpeedDial.Action
+                    color={"#000"}
+                    icon={{ name: 'delete', color: '#fff' }}
+                    title="Delete"
+                    onPress={() => console.log('Delete Something')}
+                />
+            </SpeedDial>
         </View>
 
     );
