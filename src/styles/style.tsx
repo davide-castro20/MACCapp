@@ -1,5 +1,9 @@
 import { StyleSheet } from 'react-native';
 
+import { useTheme } from '@rneui/themed'
+
+let theme = useTheme();
+
 const styles = StyleSheet.create({
     sectionContainer: {
         marginTop: 32,
@@ -26,6 +30,9 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         alignItems: 'center',
     },
+    header: {
+        backgroundColor: theme.theme.colors.background
+    }
 });
 
 export default styles;

@@ -7,22 +7,28 @@ import {
     RefreshControl,
 } from 'react-native';
 
-import { ListItem, Avatar, SpeedDial, Icon } from '@rneui/themed'
+import { ListItem, Avatar, SpeedDial, Icon, FAB, useTheme } from '@rneui/themed'
 
 import React, { useState, useEffect, useCallback } from 'react';
 
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
+import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 
 
 import styles from '../../src/styles/style';
 
-const HomeScreen = (props) => {
+import PostItem from '../components/PostItem';
+
+
+
+const HomeScreen = (props: any) => {
 
 
     const [loadingPosts, setLoadingPosts] = useState(false);
     const [posts, setPosts] = useState([]);
     const [speedDialOpen, setSpeedDialOpen] = useState(false);
+
+    const theme = useTheme();
 
     useEffect(() => {
         getPosts(props.user);
@@ -42,8 +48,8 @@ const HomeScreen = (props) => {
             .collection('posts')
             .where('creator', '==', user.uid)
             .onSnapshot(postsSnapshot => {
-                let newPosts = [];
-                let postPromises = [];
+                let newPosts: any = [];
+                let postPromises: Promise<void | FirebaseFirestoreTypes.DocumentSnapshot<FirebaseFirestoreTypes.DocumentData>>[] = [];
 
                 postsSnapshot.forEach(postSnap => {
                     let postData = postSnap.data();
@@ -65,60 +71,26 @@ const HomeScreen = (props) => {
             });
     }
 
-    const keyExtractor = (item, index) => index.toString();
+    const keyExtractor = (_item: any, index: number) => index.toString();
 
-    const renderPost = (post) => {
-        let photo = post.item.creator.photoURL == null ? "" : post.item.creator.photoURL;
+    const HomeSpeedDial = () => {
         return (
-            <ListItem bottomDivider >
-                <Avatar source={{ uri: photo }} rounded={true} />
-                <ListItem.Content>
-                    <ListItem.Title>{post.item.text}</ListItem.Title>
-                    <ListItem.Subtitle>{post.item.creator.firstName} {post.item.creator.lastName}</ListItem.Subtitle>
-                </ListItem.Content>
-                {/* <ListItem.Chevron /> */}
-            </ListItem>
-        );
-    }
-
-    return (
-
-        <View style={{flex: 1}}>
-            {
-                loadingPosts ? (
-                    <ActivityIndicator />
-                ) : (
-                    // <ScrollView>
-                    <FlatList
-                        keyExtractor={keyExtractor}
-                        data={posts}
-                        renderItem={renderPost}
-                        refreshControl={
-                            <RefreshControl
-                                refreshing={loadingPosts}
-                                onRefresh={refreshPosts}
-                                title="Pull to refresh" />
-                        }
-                    />
-                )
-                // </ScrollView>
-            }
             <SpeedDial
                 isOpen={speedDialOpen}
                 color={"#000"}
                 icon={<Icon reverse
                     size={20}
                     color={"#000"}
-                    iconStyle={{color: "#fff"}}
+                    iconStyle={{ color: "#fff" }}
                     name='pen-nib'
-                    type='font-awesome-5' 
-                    />}
+                    type='font-awesome-5'
+                />}
                 openIcon={{ name: 'close', color: '#fff' }}
                 onOpen={() => setSpeedDialOpen(!speedDialOpen)}
                 onClose={() => setSpeedDialOpen(!speedDialOpen)}
             >
                 <SpeedDial.Action
-                    color={"#000"}      
+                    color={"#000"}
                     icon={{ name: 'add', color: '#fff' }}
                     title="Add"
                     onPress={() => props.navigation.push("CreatePost")}
@@ -130,8 +102,42 @@ const HomeScreen = (props) => {
                     onPress={() => console.log('Delete Something')}
                 />
             </SpeedDial>
-        </View>
+        );
+    }
 
+    if (loadingPosts)
+        return (
+            <View style={{ flex: 1, flexDirection: 'column', alignItems:'center', alignContent: 'center' }}>
+                {/* <ActivityIndicator style={{ alignSelf: 'center' }} /> */}
+                <FAB
+                    loading
+                    visible={true}
+                    size='small'
+                    icon={{ name:'loading', color: theme.theme.colors.white }}
+                    style={{alignSelf:'center'}}
+                    color={theme.theme.colors.black}
+                />
+                <HomeSpeedDial />
+            </View>
+        );
+
+    return (
+        <View style={{ flex: 1 }}>
+
+            <FlatList
+                keyExtractor={keyExtractor}
+                data={posts}
+                renderItem={(postItem) => { return <PostItem post={postItem.item} /> }}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={loadingPosts}
+                        onRefresh={refreshPosts}
+                        title="Pull to refresh" />
+                }
+            />
+            <HomeSpeedDial />
+
+        </View>
     );
 }
 
