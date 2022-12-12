@@ -12,7 +12,7 @@ export type FaceObject = {
     height: number
 };
 
-export const labelImage = (url: string) => {
+export const labelImage = (url: string): Promise<Response> => {
     return ImageLabelingModule.labelImage(url);
 };
 

@@ -151,6 +151,7 @@ const App = () => {
                 <Stack.Screen name="Home" children={() => <HomeScreen user={user} />}
                   options={({ navigation }) => ({
                     headerTitle: "Timeline",
+                    headerTitleStyle: styles.headerTitle,
                     headerStyle: styles.header,
                     headerLeft: () => (
                       <Avatar
@@ -174,6 +175,7 @@ const App = () => {
                   options={({ navigation }) => ({
                     headerTitle: "User menu",
                     headerStyle: styles.header,
+                    headerTitleStyle: styles.headerTitle,
                     headerLeft: () => (
                       <Icon reverse
                         size={20}
@@ -187,6 +189,7 @@ const App = () => {
                   options={({ navigation }) => ({
                     headerTitle: "Create Post",
                     headerStyle: styles.header,
+                    headerTitleStyle: styles.headerTitle,
                     headerLeft: () => (
                       <Icon reverse
                         size={20}
@@ -200,6 +203,7 @@ const App = () => {
                   options={({ navigation }) => ({
                     headerTitle: "Add Image",
                     headerStyle: styles.header,
+                    headerTitleStyle: styles.headerTitle,
                     headerLeft: () => (
                       <Icon reverse
                         size={20}

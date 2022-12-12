@@ -1,6 +1,7 @@
 package com.maccapp.mlkit;
 
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Base64;
@@ -9,9 +10,13 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.WritableMap;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -23,6 +28,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.google.mlkit.vision.face.Face;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -42,7 +48,7 @@ public class ImageLabelingModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void labelImage(String uriString) {
+    public void labelImage(String uriString, Promise promise) {
         Log.d("ImageLabeling", "Uri: " + uriString);
 
         Uri uri = Uri.parse(uriString);
@@ -86,13 +92,23 @@ public class ImageLabelingModule extends ReactContextBaseJavaModule {
                             Log.d("ImageLabelingFAILED",task.getException().toString());
 
                         } else {
+                            WritableArray labelsArray = Arguments.createArray();
+
                             for (JsonElement label : task.getResult().getAsJsonArray().get(0).getAsJsonObject().get("labelAnnotations").getAsJsonArray()) {
                                 JsonObject labelObj = label.getAsJsonObject();
                                 String text = labelObj.get("description").getAsString();
                                 String entityId = labelObj.get("mid").getAsString();
                                 float score = labelObj.get("score").getAsFloat();
                                 Log.d("Label", text);
+
+                                WritableMap labelMapObject = Arguments.createMap();
+                                labelMapObject.putString("entityId", entityId);
+                                labelMapObject.putString("text", text);
+                                labelMapObject.putDouble("score", score);
+
+                                labelsArray.pushMap(labelMapObject);
                             }
+                            promise.resolve(labelsArray);
                         }
                     }
                 });

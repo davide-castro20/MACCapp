@@ -1,8 +1,7 @@
+import { color } from '@rneui/base';
 import { StyleSheet } from 'react-native';
 
-import { useTheme } from '@rneui/themed'
 
-let theme = useTheme();
 
 const styles = StyleSheet.create({
     sectionContainer: {
@@ -31,7 +30,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     header: {
-        backgroundColor: theme.theme.colors.background
+        backgroundColor: '#0073b5',
+    },
+    headerTitle: {
+        color: '#fff',
     }
 });
 

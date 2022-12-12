@@ -97,8 +97,8 @@ public class FaceDetectionModule extends ReactContextBaseJavaModule {
 
                                         WritableMap faceObject = Arguments.createMap();
                                         faceObject.putInt("id", id);
-                                        faceObject.putInt("top", bounds.centerX());
-                                        faceObject.putInt("left", bounds.centerX());
+                                        faceObject.putInt("top", bounds.top);
+                                        faceObject.putInt("left", bounds.left);
                                         faceObject.putInt("centerX", bounds.centerX());
                                         faceObject.putInt("centerY", bounds.centerY());
                                         faceObject.putInt("width", bounds.width());
