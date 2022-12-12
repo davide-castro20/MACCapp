@@ -49,7 +49,8 @@ const AddImageScreen = (prop: any) => {
     
     const [imageDimensions, setImageDimensions] = useState({});
 
-    const [facesOffset, setFacesOffset] = useState(0);
+    const [facesOffsetVertical, setFacesOffsetVertical] = useState(0);
+    const [facesOffsetHorizontal, setFacesOffsetHorizontal] = useState(0);
 
     const pickImageButton = useCallback((type: string, options: ImageLibraryOptions | CameraOptions) => {
         if (type == "library") {
@@ -65,7 +66,8 @@ const AddImageScreen = (prop: any) => {
 
             setLabelsReady(false);
             setFacesReady(false);
-            setFacesOffset(0);
+            setFacesOffsetVertical(0);
+            setFacesOffsetHorizontal(0);
             
             identifyLabels(uri);
             identifyFaces(uri);
@@ -159,8 +161,12 @@ const AddImageScreen = (prop: any) => {
                                         let ratioContainer = width / height;
 
                                         if (ratioOriginal > ratioContainer) {
-                                            let newFacesOffset = Math.round((1 - (ratioContainer/ratioOriginal))*100);
-                                            setFacesOffset(newFacesOffset);
+                                            let newFacesOffsetVertical = Math.round((1 - (ratioContainer/ratioOriginal))*100);
+                                            setFacesOffsetVertical(newFacesOffsetVertical);
+
+                                        } else if (ratioOriginal < ratioContainer) {
+                                            let newFacesOffsetHorizontal = Math.round((1 - (ratioOriginal/ratioContainer)) * 100);
+                                            setFacesOffsetHorizontal(newFacesOffsetHorizontal);
                                         }
                                         
                                     }} 
@@ -169,10 +175,10 @@ const AddImageScreen = (prop: any) => {
                                 {
                                     faces.map((face: Face) => (
                                         <Rect 
-                                            x={face.left + "%"}
-                                            y={((face.top * (1-(facesOffset/100))) + Math.round(facesOffset/2)) + "%"} 
-                                            width={face.width + "%"} 
-                                            height={(face.height * (1-(facesOffset/100))) + "%"} 
+                                            x={((face.left * (1-(facesOffsetHorizontal/100))) + Math.round(facesOffsetHorizontal/2)) + "%"}
+                                            y={((face.top * (1-(facesOffsetVertical/100))) + Math.round(facesOffsetVertical/2)) + "%"} 
+                                            width={(face.width * (1-(facesOffsetHorizontal/100))) + "%"} 
+                                            height={(face.height * (1-(facesOffsetVertical/100))) + "%"} 
                                             stroke="white" 
                                             key={face.id} 
                                             id={"face" + face.id} 
