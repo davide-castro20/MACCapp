@@ -18,10 +18,11 @@ import {
     ClipPath,
     Defs,
     Circle,
-    Text
+    Text,
+
 } from 'react-native-svg';
 
-import { Button, Tile } from '@rneui/themed';
+import { Button, Tile, Tooltip, TooltipProps, Input, Icon } from '@rneui/themed';
 
 import React, { useState, useEffect, useCallback } from 'react';
 
@@ -29,13 +30,34 @@ import { labelImage, detectFaces } from '../mlkit';
 
 import * as ImagePicker from 'react-native-image-picker';
 import { CameraOptions, ImageLibraryOptions } from 'react-native-image-picker/lib/typescript/types';
+import { color } from '@rneui/base';
+
+import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+
 
 type Face = {
     id: number,
     top: number,
     left: number,
     width: number,
-    height: number
+    height: number,
+    user: {
+        id: string,
+        username: string,
+        name: string
+    }
+    centerX: number,
+    centerY: number
+}
+
+type ImageDimensions = {
+    width: number,
+    height: number,
+}
+
+type FacesOffset = {
+    vertical: number,
+    horizontal: number,
 }
 
 const AddImageScreen = (prop: any) => {
@@ -45,12 +67,16 @@ const AddImageScreen = (prop: any) => {
     const [facesReady, setFacesReady] = useState(false);
 
     const [labels, setLabels] = useState<any>([]);
-    const [faces, setFaces] = useState<any>([]);
-    
-    const [imageDimensions, setImageDimensions] = useState({});
+    const [faces, setFaces] = useState<Map<number, Face>>(new Map());
 
-    const [facesOffsetVertical, setFacesOffsetVertical] = useState(0);
-    const [facesOffsetHorizontal, setFacesOffsetHorizontal] = useState(0);
+    const [activeFace, setAtiveFace] = useState(-1);
+    const [nameInput, setNameInput] = useState<string>("");
+    const [inputUserId, setInputUserId] = useState<string>("");
+    const [usernameChecked, setUsernameChecked] = useState(false);
+
+    const [imageDimensions, setImageDimensions] = useState<ImageDimensions>();
+
+    const [facesOffset, setFacesOffset] = useState({ vertical: 0, horizontal: 0 });
 
     const pickImageButton = useCallback((type: string, options: ImageLibraryOptions | CameraOptions) => {
         if (type == "library") {
@@ -66,13 +92,39 @@ const AddImageScreen = (prop: any) => {
 
             setLabelsReady(false);
             setFacesReady(false);
-            setFacesOffsetVertical(0);
-            setFacesOffsetHorizontal(0);
-            
+            setAtiveFace(-1);
+            setFacesOffset({ vertical: 0, horizontal: 0 });
+
             identifyLabels(uri);
             identifyFaces(uri);
         }
     }, [response]);
+
+    const checkUser = (username : string) => {
+
+        setUsernameChecked(false);
+        setInputUserId("");
+        return firestore()
+        .collection('users')
+        .where('username', '==', username)
+        .get()
+        .then(querySnapshot => {
+            console.log(querySnapshot);
+
+            if (querySnapshot.size > 0) {
+
+                setInputUserId(querySnapshot.docs[0].id);
+            } 
+            setUsernameChecked(true);
+        });
+    };
+
+    useEffect(() => {
+        if (faces.has(activeFace))
+            if (faces.get(activeFace)?.user.username != null) {
+                checkUser(faces.get(activeFace).user.username);
+            }
+    }, [activeFace]);
 
     const identifyLabels = async (uri: string) => {
         if (uri) {
@@ -95,24 +147,30 @@ const AddImageScreen = (prop: any) => {
 
         if (uri) {
             try {
-                let dimensions : any = {};
+                let dimensions: any = {};
                 const facesResponse = await detectFaces(uri);
-                await Image.getSize(uri, (width, height) => {dimensions.width = width; dimensions.height = height;});
+                await Image.getSize(uri, (width, height) => { dimensions.width = width; dimensions.height = height; });
 
-            
-                let newFacesResponse : any = [];
+                let facesMap = new Map();
+
                 for (let face of facesResponse) {
                     face.width = Math.round((face.width / dimensions.width) * 100);
                     face.height = Math.round((face.height / dimensions.height) * 100);
                     face.left = Math.round((face.left / dimensions.width) * 100);
                     face.top = Math.round((face.top / dimensions.height) * 100);
-                    newFacesResponse = [...newFacesResponse, face];
+                    face.centerX = Math.round((face.centerX / dimensions.width) * 100);
+                    face.centerY = Math.round((face.centerY / dimensions.height) * 100);
+                    face.user = {};
+
+                    facesMap.set(face.id, face);
                 }
 
                 setImageDimensions(dimensions);
 
+                console.log(facesMap)
+
                 setFacesReady(true);
-                setFaces(newFacesResponse);
+                setFaces(facesMap);
 
             } catch (error) {
                 console.log("Face recognition error");
@@ -120,35 +178,51 @@ const AddImageScreen = (prop: any) => {
         }
     };
 
+    const FaceTooltip: React.FC<TooltipProps> = (props) => {
+        const [open, setOpen] = React.useState(false);
+        return (
+            <Tooltip
+                visible={open}
+                onOpen={() => {
+                    setOpen(true);
+                }}
+                onClose={() => {
+                    setOpen(false);
+                }}
+                {...props}
+            />
+        );
+    };
+
     return (
-        <View style={{height: "100%", marginHorizontal: "5%"}}>
+        <View style={{ height: "100%", marginHorizontal: "5%" }}>
             {/* <ScrollView>
             <Text>{JSON.stringify(response, null, 2)}</Text>
             </ScrollView> */}
 
             {!response?.assets ? (
-                <View style={{ flex: 1, justifyContent: 'center'}}>
-                
-                <Button
-                    size="lg"
-                    containerStyle={{paddingHorizontal: "15%"}}
-                    type="solid"
-                    title="Select image"
-                    onPress={
-                        () =>
-                            pickImageButton('library', {
-                                selectionLimit: 1,
-                                mediaType: 'photo',
-                                includeBase64: false,
-                            })
-                    }>
-                </Button>
+                <View style={{ flex: 1, justifyContent: 'center' }}>
+
+                    <Button
+                        size="lg"
+                        containerStyle={{ paddingHorizontal: "15%" }}
+                        type="solid"
+                        title="Select image"
+                        onPress={
+                            () =>
+                                pickImageButton('library', {
+                                    selectionLimit: 1,
+                                    mediaType: 'photo',
+                                    includeBase64: false,
+                                })
+                        }>
+                    </Button>
                 </View>
             ) : (
-                <View style={{height: "100%"}}>
-                    {(labelsReady && facesReady) ?
+                <View style={{ height: "100%" }}>
+                    {(imageDimensions && labelsReady && facesReady) ?
                         (
-                            <View key={"selected_image"} style={{flex: 1, justifyContent:'flex-start'}}>
+                            <View key={"selected_image"} style={{ flex: 1, justifyContent: 'flex-start' }}>
 
                                 <ImageBackground
                                     style={{ width: "100%", height: "100%" }}
@@ -161,44 +235,118 @@ const AddImageScreen = (prop: any) => {
                                         let ratioContainer = width / height;
 
                                         if (ratioOriginal > ratioContainer) {
-                                            let newFacesOffsetVertical = Math.round((1 - (ratioContainer/ratioOriginal))*100);
-                                            setFacesOffsetVertical(newFacesOffsetVertical);
+                                            let newFacesOffsetVertical = Math.round((1 - (ratioContainer / ratioOriginal)) * 100);
+                                            setFacesOffset({ vertical: newFacesOffsetVertical, horizontal: 0 });
 
                                         } else if (ratioOriginal < ratioContainer) {
-                                            let newFacesOffsetHorizontal = Math.round((1 - (ratioOriginal/ratioContainer)) * 100);
-                                            setFacesOffsetHorizontal(newFacesOffsetHorizontal);
+                                            let newFacesOffsetHorizontal = Math.round((1 - (ratioOriginal / ratioContainer)) * 100); 1
+                                            setFacesOffset({ vertical: 0, horizontal: newFacesOffsetHorizontal });
                                         }
-                                        
-                                    }} 
+
+                                    }}
                                 >
-                                <Svg width="100%" height="100%" style={{ position: 'absolute' }}>
-                                {
-                                    faces.map((face: Face) => (
-                                        <Rect 
-                                            x={((face.left * (1-(facesOffsetHorizontal/100))) + Math.round(facesOffsetHorizontal/2)) + "%"}
-                                            y={((face.top * (1-(facesOffsetVertical/100))) + Math.round(facesOffsetVertical/2)) + "%"} 
-                                            width={(face.width * (1-(facesOffsetHorizontal/100))) + "%"} 
-                                            height={(face.height * (1-(facesOffsetVertical/100))) + "%"} 
-                                            stroke="white" 
-                                            key={face.id} 
-                                            id={"face" + face.id} 
-                                            strokeWidth="3"
-                                            strokeOpacity={0.7}
-                                            onPress={() => {
-                                            }}/>
-                                    ))
-                                }
-                                </Svg>
+                                    <Svg width="100%" height="100%" style={{ position: 'absolute' }}>
+                                        {
+
+                                            Array.from(faces.values()).map((face: Face) => (
+                                                <View>
+                                                    <Rect
+                                                        x={((face.left * (1 - (facesOffset.horizontal / 100))) + Math.round(facesOffset.horizontal / 2)) + "%"}
+                                                        y={((face.top * (1 - (facesOffset.vertical / 100))) + Math.round(facesOffset.vertical / 2)) + "%"}
+                                                        width={(face.width * (1 - (facesOffset.horizontal / 100))) + "%"}
+                                                        height={(face.height * (1 - (facesOffset.vertical / 100))) + "%"}
+                                                        stroke={activeFace == face.id ? "#94f277" : "white"}
+                                                        key={face.id}
+                                                        id={"face " + face.id}
+                                                        strokeWidth="3"
+                                                        strokeOpacity={0.7}
+                                                        onPress={() => {
+                                                            if (activeFace == face.id) {
+                                                                setNameInput("");
+                                                                setAtiveFace(-1)
+                                                                return;
+                                                            }
+                                                            setAtiveFace(face.id)
+                                                            setNameInput(face.user.username ? face.user.username : "")
+                                                        }} />
+                                                    {
+                                                        activeFace == face.id &&
+                                                        <Text
+                                                            x={((face.centerX * (1 - (facesOffset.horizontal / 100))) + Math.round(facesOffset.horizontal / 2)) + "%"}
+                                                            y={(((face.top * (1 - (facesOffset.vertical / 100))) + Math.round(facesOffset.vertical / 2)) - 1) + "%"}
+                                                            stroke="#000" fill="#000" textAnchor="middle" strokeWidth={1.5}
+                                                            opacity={0.4}
+                                                            fontSize={20}
+                                                        >{face.user.username}</Text>
+                                                    }
+                                                </View>
+
+                                            ))
+                                        }
+
+                                    </Svg>
+
                                 </ImageBackground>
                             </View>
 
                         ) :
                         (
-                            <View key={"loading image"} style={{flex: 1, justifyContent:'center'}}>
+                            <View key={"loading image"} style={{ flex: 1, justifyContent: 'center' }}>
                                 <ActivityIndicator size="large" />
                             </View>
                         )
                     }
+                    {
+                        activeFace != -1 &&
+                        <Input
+                            placeholder='Username...'
+                            value={nameInput}
+                            inputStyle={{ color: "#000" }}
+                            onChangeText={value => {
+                                setNameInput(value); 
+                                checkUser(value);
+                            }}
+                            onSubmitEditing={event => {
+                                if (usernameChecked && inputUserId.length > 0 && faces.has(activeFace)) {
+                                    faces.get(activeFace).user = {
+                                        username: event.nativeEvent.text,
+                                        id: inputUserId,
+                                        
+                                    }
+                                    faces.get(activeFace).user.username = event.nativeEvent.text;
+                                }
+                            }}
+
+
+                        rightIcon={  
+                            (nameInput.length > 0 && 
+                                (
+                                    usernameChecked ? (
+                                        inputUserId.length > 0 ? 
+                                        <Icon
+                                        size={20}
+                                        color={"#000"}
+                                        iconStyle={{ color: "#0f0" }}
+                                        name='check'
+                                        type='font-awesome-5'
+                                    /> : 
+                                    <Icon
+                                        size={20}
+                                        color={"#000"}
+                                        iconStyle={{ color: "#f00" }}
+                                        name='times'
+                                        type='font-awesome-5'
+                                    /> 
+                                    )
+                                    
+                                    :
+                                    <ActivityIndicator/>
+                                )
+                            )
+                        }
+                        />
+                    }
+
                     <Button
                         type="solid"
                         title="Select another image"
