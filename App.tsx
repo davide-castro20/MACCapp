@@ -49,7 +49,7 @@ import UserMenuScreen from './src/screens/userMenu';
 import CreatePostScreen from './src/screens/createPost';
 import AddImageScreen from './src/screens/addImage';
 
-import { Avatar, Icon } from '@rneui/base';
+import { Avatar, Icon, Skeleton } from '@rneui/base';
 
 
 const appTheme = createTheme({
@@ -217,7 +217,22 @@ const App = () => {
             )
 
               :
-              <ActivityIndicator />
+              <Stack.Navigator>
+                <Stack.Screen name="Home" children={() => <HomeScreen user={user} />}
+                  options={({ navigation }) => ({
+                    headerTitle: "Timeline",
+                    headerTitleStyle: styles.headerTitle,
+                    headerStyle: styles.header,
+                    headerLeft: () => (
+                      <Skeleton
+                        circle={true}
+                        animation='pulse'
+                        width={40}
+                        style={{marginRight:10}}
+                      />
+                    ),
+                  })} />
+              </Stack.Navigator>
           )
         }
 

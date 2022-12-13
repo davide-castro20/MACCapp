@@ -5,9 +5,10 @@ import {
     FlatList,
     ActivityIndicator,
     RefreshControl,
+    Dimensions
 } from 'react-native';
 
-import { ListItem, Avatar, SpeedDial, Icon, FAB, useTheme } from '@rneui/themed'
+import { ListItem, Avatar, SpeedDial, Icon, FAB, useTheme, Skeleton } from '@rneui/themed'
 
 import React, { useState, useEffect, useCallback } from 'react';
 
@@ -29,6 +30,8 @@ const HomeScreen = (props: any) => {
     const [speedDialOpen, setSpeedDialOpen] = useState(false);
 
     const theme = useTheme();
+
+    const screenDimensions = Dimensions.get('screen');
 
     useEffect(() => {
         getPosts(props.user);
@@ -107,17 +110,43 @@ const HomeScreen = (props: any) => {
 
     if (loadingPosts)
         return (
-            <View style={{ flex: 1, flexDirection: 'column', alignItems:'center', alignContent: 'center' }}>
-                {/* <ActivityIndicator style={{ alignSelf: 'center' }} /> */}
-                <FAB
-                    loading
-                    visible={true}
-                    size='small'
-                    icon={{ name:'loading', color: theme.theme.colors.white }}
-                    style={{alignSelf:'center'}}
-                    color={theme.theme.colors.black}
-                />
-                <HomeSpeedDial />
+            <View style={{ flex: 1 }}>
+                <FlatList
+                keyExtractor={keyExtractor}
+                data={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+                renderItem={(item) => {
+                    return (
+                        <ListItem bottomDivider>
+                            <ListItem.Title><Skeleton
+                                circle={true}
+                                animation="pulse"
+                                width={35}
+                            /></ListItem.Title>
+                            <ListItem.Content>
+                                <ListItem.Title style={{ marginBottom: 5 }}>
+                                    <Skeleton
+                                        animation="pulse"
+                                        width={(Math.random() * screenDimensions.width * 0.3) + (screenDimensions.width * 0.2)}
+                                        height={15}
+                                    />
+                                </ListItem.Title>
+                                <ListItem.Subtitle>
+                                    <Skeleton
+                                        animation="pulse"
+                                        width={300}
+                                        height={23}
+                                    />
+                                </ListItem.Subtitle>
+                            </ListItem.Content>
+                        </ListItem>);
+                }}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={loadingPosts}
+                        onRefresh={refreshPosts}
+                        title="Pull to refresh" />
+                }
+            />
             </View>
         );
 
