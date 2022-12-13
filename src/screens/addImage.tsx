@@ -314,6 +314,14 @@ const AddImageScreen = (prop: any) => {
                                         
                                     }
                                     faces.get(activeFace).user.username = event.nativeEvent.text;
+                                } else {
+                                    if (faces.has(activeFace)) {
+                                        let userAlreadySet = faces.get(activeFace).user;
+                                        if (userAlreadySet) {
+                                            setNameInput(userAlreadySet.username);
+                                            setInputUserId(userAlreadySet.id);
+                                        }
+                                    }
                                 }
                             }}
 
