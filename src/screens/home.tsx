@@ -20,6 +20,7 @@ import styles from '../../src/styles/style';
 
 import PostItem from '../components/PostItem';
 
+import {useDispatch, useSelector} from 'react-redux'
 
 
 const HomeScreen = (props: any) => {
@@ -30,6 +31,8 @@ const HomeScreen = (props: any) => {
     const [speedDialOpen, setSpeedDialOpen] = useState(false);
 
     const theme = useTheme();
+
+    const storeState = useSelector(state => state);
 
     const screenDimensions = Dimensions.get('screen');
 
@@ -108,7 +111,7 @@ const HomeScreen = (props: any) => {
         );
     }
 
-    if (loadingPosts)
+    if (loadingPosts || !storeState.user)
         return (
             <View style={{ flex: 1 }}>
                 <FlatList

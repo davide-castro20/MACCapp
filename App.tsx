@@ -51,6 +51,9 @@ import AddImageScreen from './src/screens/addImage';
 
 import { Avatar, Icon, Skeleton } from '@rneui/base';
 
+import { useDispatch, useSelector } from 'react-redux'
+import { setUserData } from './src/redux/user'
+
 
 const appTheme = createTheme({
   mode: 'dark',
@@ -74,10 +77,12 @@ const App = () => {
   // Set an initializing state whilst Firebase connects
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState<FirebaseAuthTypes.User>();
-  const [userData, setUserData] = useState<any>();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [loadingUser, setLoadingUser] = useState(true);
+
+  const dispatch = useDispatch();
+  const userData = useSelector(state => state.user.userData);
 
   // Handle user state changes
   function onAuthStateChanged(user: any) {
@@ -93,9 +98,8 @@ const App = () => {
       .collection('users')
       .doc(user.uid)
       .get()
-      .then(userData => {
-        console.log(userData)
-        setUserData(userData.data());
+      .then(newUserData => {
+        dispatch(setUserData(newUserData.data()));
         setLoadingUser(false);
       });
   }

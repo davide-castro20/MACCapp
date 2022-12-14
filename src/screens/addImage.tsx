@@ -327,7 +327,7 @@ const AddImageScreen = (prop: any) => {
 
 
                         rightIcon={  
-                            (nameInput.length > 0 && 
+                            (nameInput?.length > 0 && 
                                 (
                                     usernameChecked ? (
                                         inputUserId.length > 0 ? 
@@ -355,19 +355,37 @@ const AddImageScreen = (prop: any) => {
                         />
                     }
 
-                    <Button
-                        type="solid"
-                        title="Select another image"
-                        containerStyle={{ marginBottom: 20 }}
-                        onPress={
-                            () =>
-                                pickImageButton('library', {
-                                    selectionLimit: 1,
-                                    mediaType: 'photo',
-                                    includeBase64: false,
-                                })
-                        }>
-                    </Button>
+                    <View style={{ marginTop: 10, marginBottom: 20}}>
+                        <View style={{flexDirection: 'row'}}>
+                        <Button
+                            type="outline"
+                            title="Select another image"
+                            style={{width: "50%"}}
+                            containerStyle={{ flex: 1, marginRight: 10}}
+                            onPress={
+                                () =>
+                                    pickImageButton('library', {
+                                        selectionLimit: 1,
+                                        mediaType: 'photo',
+                                        includeBase64: false,
+                                    })
+                            }>
+                        </Button>  
+                        <Button
+                            type="solid"
+                            title="Confirm"
+                            containerStyle={{flex: 1, marginLeft: 10}}
+                            onPress={
+                                () =>
+                                    pickImageButton('library', {
+                                        selectionLimit: 1,
+                                        mediaType: 'photo',
+                                        includeBase64: false,
+                                    })
+                            }>
+                        </Button> 
+                        </View>
+                    </View>
                 </View>
             )
             }
