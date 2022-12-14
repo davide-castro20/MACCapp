@@ -17,7 +17,7 @@ import firestore from '@react-native-firebase/firestore';
 
 import styles from '../../src/styles/style';
 
-const UserMenuScreen = (props: any) => {    
+const UserMenuScreen = () => {    
 
     const { mode, setMode } = useThemeMode();
 

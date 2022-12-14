@@ -34,21 +34,10 @@ import { color } from '@rneui/base';
 
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 
+import { Face } from '../types';
 
-type Face = {
-    id: number,
-    top: number,
-    left: number,
-    width: number,
-    height: number,
-    user: {
-        id: string,
-        username: string,
-        name: string
-    }
-    centerX: number,
-    centerY: number
-}
+import { useDispatch, useSelector } from 'react-redux';
+import { setNewImage, setNewLabels, setNewFaces } from '../redux/newPost';
 
 type ImageDimensions = {
     width: number,
@@ -60,7 +49,7 @@ type FacesOffset = {
     horizontal: number,
 }
 
-const AddImageScreen = (prop: any) => {
+const AddImageScreen = (props: any) => {
 
     const [response, setResponse] = useState<any>(null);
     const [labelsReady, setLabelsReady] = useState(false);
@@ -77,6 +66,9 @@ const AddImageScreen = (prop: any) => {
     const [imageDimensions, setImageDimensions] = useState<ImageDimensions>();
 
     const [facesOffset, setFacesOffset] = useState({ vertical: 0, horizontal: 0 });
+    
+    const dispatch = useDispatch();
+
 
     const pickImageButton = useCallback((type: string, options: ImageLibraryOptions | CameraOptions) => {
         if (type == "library") {
@@ -85,6 +77,13 @@ const AddImageScreen = (prop: any) => {
             ImagePicker.launchCamera(options, setResponse);
         }
     }, []);
+
+    const submitNewImage = () => {
+        dispatch(setNewImage(response.assets[0].uri));
+        dispatch(setNewLabels(labels));
+        dispatch(setNewFaces(Array.from(faces.values())));
+        props.navigation.goBack();
+    };
 
     useEffect(() => {
         if (response?.assets) {
@@ -374,15 +373,9 @@ const AddImageScreen = (prop: any) => {
                         <Button
                             type="solid"
                             title="Confirm"
+                            disabled={!labelsReady || !facesReady || !response?.assets}
                             containerStyle={{flex: 1, marginLeft: 10}}
-                            onPress={
-                                () =>
-                                    pickImageButton('library', {
-                                        selectionLimit: 1,
-                                        mediaType: 'photo',
-                                        includeBase64: false,
-                                    })
-                            }>
+                            onPress={ submitNewImage }>
                         </Button> 
                         </View>
                     </View>

@@ -1,13 +1,11 @@
 import {
     View,
-    Text,
-    TextInput,
     FlatList,
     ActivityIndicator,
     RefreshControl,
 } from 'react-native';
 
-import { Button } from '@rneui/themed';
+import { Button, Text, Input } from '@rneui/themed';
 
 import React, { useState, useEffect, useCallback } from 'react';
 
@@ -49,7 +47,7 @@ const CreatePostScreen = (props: any) => {
     return (
         <View>
             <View style={styles.inputView}>
-                <TextInput
+                <Input
                     style={styles.textInput}
                     placeholder="Text"
                     placeholderTextColor="#003f5c"
@@ -57,7 +55,7 @@ const CreatePostScreen = (props: any) => {
                 />
             </View>
             <View style={styles.inputView}>
-                <TextInput
+                <Input
                     style={styles.textInput}
                     placeholder="Tags"
                     placeholderTextColor="#003f5c"

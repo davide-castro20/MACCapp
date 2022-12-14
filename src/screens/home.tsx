@@ -33,15 +33,17 @@ const HomeScreen = (props: any) => {
     const theme = useTheme();
 
     const storeState = useSelector(state => state);
+    const user = useSelector(state => state.user.user);
+    const userData = useSelector(state => state.user.userData);
 
     const screenDimensions = Dimensions.get('screen');
 
     useEffect(() => {
-        getPosts(props.user);
+        getPosts(user);
     }, []);
 
     const refreshPosts = useCallback(() => {
-        getPosts(props.user);
+        getPosts(user);
     }, []);
 
     async function getPosts(user: any) {
@@ -111,7 +113,7 @@ const HomeScreen = (props: any) => {
         );
     }
 
-    if (loadingPosts || !storeState.user)
+    if (loadingPosts || !userData)
         return (
             <View style={{ flex: 1 }}>
                 <FlatList

@@ -51,8 +51,8 @@ import AddImageScreen from './src/screens/addImage';
 
 import { Avatar, Icon, Skeleton } from '@rneui/base';
 
-import { useDispatch, useSelector } from 'react-redux'
-import { setUserData } from './src/redux/user'
+import { useDispatch, useSelector } from 'react-redux';
+import { setUserData, setUser } from './src/redux/user';
 
 
 const appTheme = createTheme({
@@ -76,17 +76,26 @@ const App = () => {
 
   // Set an initializing state whilst Firebase connects
   const [initializing, setInitializing] = useState(true);
-  const [user, setUser] = useState<FirebaseAuthTypes.User>();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [loadingUser, setLoadingUser] = useState(true);
 
   const dispatch = useDispatch();
   const userData = useSelector(state => state.user.userData);
+  const user = useSelector(state => state.user.user);
 
   // Handle user state changes
   function onAuthStateChanged(user: any) {
-    setUser(user);
+    let userStore = {
+      displayName: user.displayName,
+      email: user.email,
+      emailVerified: user.emailVerified,
+      phoneNumber: user.phoneNumber,
+      photoURL: user.photoURL,
+      uid: user.uid,
+    };
+
+    dispatch(setUser(userStore));
     if (loadingUser) getUserData(user);
     if (initializing) setInitializing(false);
   }
@@ -152,7 +161,7 @@ const App = () => {
           (
             userData ? (
               <Stack.Navigator>
-                <Stack.Screen name="Home" children={() => <HomeScreen user={user} />}
+                <Stack.Screen name="Home" component={HomeScreen}
                   options={({ navigation }) => ({
                     headerTitle: "Timeline",
                     headerTitleStyle: styles.headerTitle,
@@ -163,7 +172,7 @@ const App = () => {
                         rounded={true}
                         size={40}
                         containerStyle={{marginRight: 8}}
-                        onPress={() => { /* TODO: side menu with profile and options */ navigation.push("UserMenu")}}
+                        onPress={() => navigation.push("UserMenu")}
                       />
                     ),
                     headerRight: () => (
@@ -175,7 +184,7 @@ const App = () => {
                       />
                     ),
                   })} />
-                <Stack.Screen name="UserMenu" children={() => <UserMenuScreen user={user} />}
+                <Stack.Screen name="UserMenu" component={UserMenuScreen}
                   options={({ navigation }) => ({
                     headerTitle: "User menu",
                     headerStyle: styles.header,
@@ -189,7 +198,7 @@ const App = () => {
                       />
                     ),
                   })} />
-                <Stack.Screen name="CreatePost" children={() => <CreatePostScreen navigation={useNavigation()}/*TODO: rever isto*/ user={user} />}
+                <Stack.Screen name="CreatePost" component={CreatePostScreen}
                   options={({ navigation }) => ({
                     headerTitle: "Create Post",
                     headerStyle: styles.header,

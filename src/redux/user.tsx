@@ -4,10 +4,14 @@ import { createSlice } from '@reduxjs/toolkit'
 const userSlice = createSlice({
     name: 'user',
     initialState: {
+        user: null,
         userData: null,
     },
     reducers: {
-        loginSuccess: (state, action) => {
+        loginSucess: (state, action) => {
+            state.user = action.payload.user;
+        },
+        userDataSucess: (state, action) => {
             state.userData = action.payload.userData;
         },
         logoutSuccess: (state, action) => {
@@ -18,14 +22,24 @@ const userSlice = createSlice({
 export default userSlice.reducer
 
 // Actions
-const { loginSuccess, logoutSuccess } = userSlice.actions
-export const setUserData = ( userData ) => async dispatch => {
+const { loginSucess, userDataSucess, logoutSuccess } = userSlice.actions;
+
+export const setUser = ( user ) => async dispatch => {
     try {
-        dispatch(loginSuccess({ userData }));
+        dispatch(loginSucess({ user }));
     } catch (e) {
         return console.error(e.message);
     }
 }
+
+export const setUserData = ( userData ) => async dispatch => {
+    try {
+        dispatch(userDataSucess({ userData }));
+    } catch (e) {
+        return console.error(e.message);
+    }
+}
+
 export const unsetUser = () => async dispatch => {
     try {
         // const res = await api.post('/api/auth/logout/')

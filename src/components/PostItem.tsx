@@ -1,10 +1,15 @@
 import { ListItem, Avatar, SpeedDial, Icon } from '@rneui/themed'
 
+import { Face } from '../types';
+
 type Post = {
     creator: {
         photoURL: string,
         firstName: string,
         lastName: string,
+        imageURL: string,
+        faces: Face[],
+        tags: string[]
     },
     text: string,
     //TODO
