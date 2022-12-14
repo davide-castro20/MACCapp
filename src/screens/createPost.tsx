@@ -12,7 +12,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
-import styles from '../../src/styles/style';
+import createPostStyles from '../../src/styles/createPost';
 
 
 const CreatePostScreen = (props: any) => {
@@ -20,6 +20,8 @@ const CreatePostScreen = (props: any) => {
     const [postText, setPostText] = useState("");
     const [postTags, setPostTags] = useState("");
     const [creatingPost, setCreatingPost] = useState(false);
+
+    const styles = createPostStyles(props);
 
     const createPost = () => {
         if (!auth().currentUser) return;
@@ -45,19 +47,20 @@ const CreatePostScreen = (props: any) => {
     };
 
     return (
-        <View>
+        <View style={styles.backgroundPage}>
             <View style={styles.inputView}>
                 <Input
                     style={styles.textInput}
-                    placeholder="Text"
+                    placeholder="What are you thinking?..."
                     placeholderTextColor="#003f5c"
                     onChangeText={text => setPostText(text)}
+                    multiline={true}
                 />
             </View>
             <View style={styles.inputView}>
                 <Input
                     style={styles.textInput}
-                    placeholder="Tags"
+                    placeholder="Tags..."
                     placeholderTextColor="#003f5c"
                     onChangeText={tags => setPostTags(tags)}
                 />

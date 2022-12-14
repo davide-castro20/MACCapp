@@ -1,7 +1,6 @@
 import { color } from '@rneui/base';
+import { makeStyles, ThemeOptions } from '@rneui/themed';
 import { StyleSheet } from 'react-native';
-
-
 
 const styles = StyleSheet.create({
     sectionContainer: {
