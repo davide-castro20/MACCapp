@@ -35,8 +35,7 @@ const CreatePostScreen = (props: any) => {
             console.log(info)
 
             let location = await getLocationName(info.coords.latitude, info.coords.longitude);
-
-            console.log(location);
+            location = JSON.parse(location);
         
             setCreatingPost(true);
 
@@ -45,6 +44,7 @@ const CreatePostScreen = (props: any) => {
                 text: postText,
                 tags: postTags.split(" "),
                 creation_date: firestore.FieldValue.serverTimestamp(),
+                location: location['formatted_address'],
             };
 
             console.log(post);

@@ -52,6 +52,8 @@ public class LocationModule extends ReactContextBaseJavaModule {
 
         mFunctions = FirebaseFunctions.getInstance();
 
+        //mFunctions.useEmulator("10.0.2.2", 5001);
+
         JsonObject request = new JsonObject();
         request.add("latitude", new JsonPrimitive(latitude));
         request.add("longitude", new JsonPrimitive(longitude));
@@ -64,7 +66,9 @@ public class LocationModule extends ReactContextBaseJavaModule {
                             Log.d("GetLocationNameFAILED",task.getException().toString());
 
                         } else {
-                            promise.resolve(task.getResult().getAsJsonObject());
+                            Log.d("LOCATION SUCCESS", task.getResult().getAsJsonArray().toString());
+
+                            promise.resolve(task.getResult().getAsJsonArray().get(0).toString());
                         }
                     }
                 });
