@@ -6,7 +6,7 @@ const newPostSlice = createSlice({
     initialState: {
         image: null,
         labels: null,
-        faces: null
+        faces: null,
     },
     reducers: {
         imageAdded: (state, action) => {
@@ -18,12 +18,17 @@ const newPostSlice = createSlice({
         facesAdded: (state, action) => {
             state.faces = action.payload.faces;
         },
+        reset: (state) => {
+            state.image = null;
+            state.labels = null;
+            state.faces = null;
+        },
     },
 });
 export default newPostSlice.reducer
 
 // Actions
-const { imageAdded, labelsAdded, facesAdded } = newPostSlice.actions;
+const { imageAdded, labelsAdded, facesAdded, reset } = newPostSlice.actions;
 
 export const setNewImage = ( image ) => async dispatch => {
     try {
@@ -44,6 +49,14 @@ export const setNewLabels = ( labels ) => async dispatch => {
 export const setNewFaces = ( faces ) => async dispatch => {
     try {
         dispatch(facesAdded(faces));
+    } catch (e) {
+        return console.error(e.message);
+    }
+}
+
+export const resetNewPost = () => async dispatch => {
+    try {
+        dispatch(reset());
     } catch (e) {
         return console.error(e.message);
     }

@@ -139,7 +139,6 @@ const App = () => {
     const unsubscribe = auth().onAuthStateChanged(onAuthStateChanged);
   }, []);
 
-  
 
   if (initializing) return null;
 

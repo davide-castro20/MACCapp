@@ -4,18 +4,21 @@ import { StyleSheet } from 'react-native';
 
 const createPostStyles = makeStyles((theme: ThemeOptions) => ({
     textInput: {
-        color: "#000"
+        color: theme.colors.black,
     },
     inputView: {
         borderRadius: 30,
-        width: '70%',
+        width: '100%',
         height: 45,
         marginBottom: 20,
         alignItems: 'center',
     },
+    inputGroup: {
+        width: "100%"
+    },
     backgroundPage: {
         backgroundColor: theme.colors.background,
-        flex: 1,
+        flex:1,
     },
     loadingDialogBackdrop: {
         backgroundColor: theme.colors.grey2,
@@ -35,7 +38,18 @@ const createPostStyles = makeStyles((theme: ThemeOptions) => ({
     },
     loadingLoadingStyle: {
         color: theme.colors.primary,
-    }
+    },
+    imagePreviewBackground: {
+        flex: 1,
+        backgroundColor: theme.colors.grey3,
+    },
+    imagePreviewContainer: {
+        flex: 1,
+        marginHorizontal: "10%",
+    },
+    imagePreview: {
+        height: "100%"
+    },
 }));
 
 export default createPostStyles;

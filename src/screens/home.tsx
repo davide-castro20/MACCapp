@@ -20,7 +20,9 @@ import styles from '../../src/styles/style';
 
 import PostItem from '../components/PostItem';
 
-import {useDispatch, useSelector} from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux';
+
+import homeStyles from '../styles/home';
 
 
 const HomeScreen = (props: any) => {
@@ -37,6 +39,8 @@ const HomeScreen = (props: any) => {
     const userData = useSelector(state => state.user.userData);
 
     const screenDimensions = Dimensions.get('screen');
+
+    const styles = homeStyles(props);
 
     useEffect(() => {
         getPosts(user);
@@ -117,49 +121,50 @@ const HomeScreen = (props: any) => {
         return (
             <View style={{ flex: 1 }}>
                 <FlatList
-                keyExtractor={keyExtractor}
-                data={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
-                renderItem={(item) => {
-                    return (
-                        <ListItem bottomDivider>
-                            <ListItem.Title><Skeleton
-                                circle={true}
-                                animation="pulse"
-                                width={35}
-                            /></ListItem.Title>
-                            <ListItem.Content>
-                                <ListItem.Title style={{ marginBottom: 5 }}>
-                                    <Skeleton
-                                        animation="pulse"
-                                        width={(Math.random() * screenDimensions.width * 0.3) + (screenDimensions.width * 0.2)}
-                                        height={15}
-                                    />
-                                </ListItem.Title>
-                                <ListItem.Subtitle>
-                                    <Skeleton
-                                        animation="pulse"
-                                        width={300}
-                                        height={23}
-                                    />
-                                </ListItem.Subtitle>
-                            </ListItem.Content>
-                        </ListItem>);
-                }}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={loadingPosts}
-                        onRefresh={refreshPosts}
-                        title="Pull to refresh" />
-                }
-            />
+                    keyExtractor={keyExtractor}
+                    data={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+                    renderItem={(item) => {
+                        return (
+                            <ListItem bottomDivider>
+                                <ListItem.Title><Skeleton
+                                    circle={true}
+                                    animation="pulse"
+                                    width={35}
+                                /></ListItem.Title>
+                                <ListItem.Content>
+                                    <ListItem.Title style={{ marginBottom: 5 }}>
+                                        <Skeleton
+                                            animation="pulse"
+                                            width={(Math.random() * screenDimensions.width * 0.3) + (screenDimensions.width * 0.2)}
+                                            height={15}
+                                        />
+                                    </ListItem.Title>
+                                    <ListItem.Subtitle>
+                                        <Skeleton
+                                            animation="pulse"
+                                            width={300}
+                                            height={23}
+                                        />
+                                    </ListItem.Subtitle>
+                                </ListItem.Content>
+                            </ListItem>);
+                    }}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={loadingPosts}
+                            onRefresh={refreshPosts}
+                            title="Pull to refresh" />
+                    }
+                />
             </View>
         );
 
     return (
-        <View style={{ flex: 1 }}>
+        <View style={styles.backgroundPage}>
 
             <FlatList
                 keyExtractor={keyExtractor}
+                contentContainerStyle={{flexGrow:1}}
                 data={posts}
                 renderItem={(postItem) => { return <PostItem post={postItem.item} /> }}
                 refreshControl={
@@ -168,7 +173,13 @@ const HomeScreen = (props: any) => {
                         onRefresh={refreshPosts}
                         title="Pull to refresh" />
                 }
+                ListEmptyComponent={(
+                    <View style={styles.emptyList}>
+                        <Text style={styles.emptyListText}>It seems that your feed is empty...</Text>
+                    </View>
+                )}
             />
+
             <HomeSpeedDial />
 
         </View>
