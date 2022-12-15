@@ -14,6 +14,10 @@ import firestore from '@react-native-firebase/firestore';
 
 import createPostStyles from '../../src/styles/createPost';
 
+import Geolocation from '@react-native-community/geolocation';
+
+import { getLocationName } from '../location';
+
 
 const CreatePostScreen = (props: any) => {
 
@@ -26,24 +30,33 @@ const CreatePostScreen = (props: any) => {
     const createPost = () => {
         if (!auth().currentUser) return;
 
-        setCreatingPost(true);
+        Geolocation.getCurrentPosition(async info => {
+            
+            console.log(info)
 
-        let post = {
-            creator: auth().currentUser?.uid,
-            text: postText,
-            tags: postTags.split(" "),
-            creation_date: firestore.FieldValue.serverTimestamp(),
-        };
+            let location = await getLocationName(info.coords.latitude, info.coords.longitude);
 
-        console.log(post);
+            console.log(location);
+        
+            setCreatingPost(true);
 
-        firestore()
-            .collection('posts')
-            .add(post)
-            .then(() => {
-                console.log('Post added!');
-                setCreatingPost(false);
-            });
+            let post = {
+                creator: auth().currentUser?.uid,
+                text: postText,
+                tags: postTags.split(" "),
+                creation_date: firestore.FieldValue.serverTimestamp(),
+            };
+
+            console.log(post);
+
+            firestore()
+                .collection('posts')
+                .add(post)
+                .then(() => {
+                    console.log('Post added!');
+                    setCreatingPost(false);
+                });
+        });
     };
 
     return (
@@ -65,17 +78,15 @@ const CreatePostScreen = (props: any) => {
                     onChangeText={tags => setPostTags(tags)}
                 />
             </View>
-            {
-                !creatingPost ? (
 
-                    <View>
-                        <Button type="solid" title="Add Image" onPress={() => {props.navigation.push("AddImage")}} />
+            <View>
+                <Button type="solid" disabled={creatingPost} title="Add Image" onPress={() => {props.navigation.push("AddImage")}} />
 
-                        <Button type="solid" title="Create Post" onPress={createPost} />
-                    </View>
+                <Button type="solid" disabled={creatingPost} title="Create Post" onPress={createPost} />
+            </View>
 
-                ) :
-                    <ActivityIndicator />
+            { creatingPost &&
+                <ActivityIndicator />
             }
         </View>
     );

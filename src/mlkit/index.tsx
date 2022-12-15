@@ -7,7 +7,7 @@ export type FaceObject = {
     top: number,
     left: number,
     centerX: number,
-    centeY: number,
+    centerY: number,
     width: number,
     height: number
 };

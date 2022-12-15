@@ -9,6 +9,7 @@ import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.config.ReactFeatureFlags;
 import com.facebook.soloader.SoLoader;
+import com.maccapp.location.LocationPackage;
 import com.maccapp.mlkit.FaceDetectionPackage;
 import com.maccapp.mlkit.ImageLabelingPackage;
 import com.maccapp.newarchitecture.MainApplicationReactNativeHost;
@@ -32,6 +33,7 @@ public class MainApplication extends Application implements ReactApplication {
           // packages.add(new MyReactNativePackage());
             packages.add(new ImageLabelingPackage());
             packages.add(new FaceDetectionPackage());
+            packages.add(new LocationPackage());
           return packages;
         }
 
