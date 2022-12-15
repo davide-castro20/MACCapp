@@ -14,7 +14,27 @@ const createPostStyles = makeStyles((theme: ThemeOptions) => ({
         alignItems: 'center',
     },
     backgroundPage: {
-        backgroundColor: theme.colors.background
+        backgroundColor: theme.colors.background,
+        flex: 1,
+    },
+    loadingDialogBackdrop: {
+        backgroundColor: theme.colors.grey2,
+        height: "100%",
+        width: "100%",
+        opacity: 0.7,
+
+    },
+    loadingDialogContainer: {
+        backgroundColor: theme.colors.grey2,
+        height: "100%",
+        width: "100%",
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'center',
+        opacity: 0.7,
+    },
+    loadingLoadingStyle: {
+        color: theme.colors.primary,
     }
 }));
 

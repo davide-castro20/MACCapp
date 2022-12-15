@@ -54,6 +54,8 @@ import { Avatar, Icon, Skeleton } from '@rneui/base';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUserData, setUser } from './src/redux/user';
 
+import Toast from 'react-native-toast-message';
+
 
 const appTheme = createTheme({
   mode: 'dark',
@@ -134,6 +136,7 @@ const App = () => {
 
 
   return (
+    <>
     <NavigationContainer>
       <ThemeProvider theme={appTheme}>
         {!user ? (
@@ -252,6 +255,10 @@ const App = () => {
 
       </ThemeProvider>
     </NavigationContainer>
+    <Toast
+      position='bottom'
+    />
+    </>
   );
 };
 
