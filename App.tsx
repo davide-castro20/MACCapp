@@ -59,6 +59,8 @@ import AmbientLightListen from './src/components/AmbientLightListen';
 
 import Toast from 'react-native-toast-message';
 
+import { DEFAULT_AVATAR } from './src/images';
+
 
 
 const appTheme = createTheme({
@@ -117,7 +119,13 @@ const App = () => {
       .doc(user.uid)
       .get()
       .then(newUserData => {
-        dispatch(setUserData(newUserData.data()));
+
+        let userDataDocument = newUserData.data();
+        if (!userDataDocument.photoURL || userDataDocument.photoURL == "") {
+          userDataDocument.photoURL = Image.resolveAssetSource(DEFAULT_AVATAR).uri;
+        }
+        
+        dispatch(setUserData(userDataDocument));
         setLoadingUser(false);
       });
   }
