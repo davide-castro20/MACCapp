@@ -19,6 +19,7 @@ import {
   View,
   TextInput,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native';
 
 import { Colors } from 'react-native/Libraries/NewAppScreen';
@@ -54,7 +55,10 @@ import { Avatar, Icon, Skeleton } from '@rneui/base';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUserData, setUser } from './src/redux/user';
 
+import AmbientLightListen from './src/components/AmbientLightListen';
+
 import Toast from 'react-native-toast-message';
+
 
 
 const appTheme = createTheme({
@@ -74,6 +78,7 @@ const appTheme = createTheme({
 
 const Stack = createNativeStackNavigator();
 
+
 const App = () => {
 
   // Set an initializing state whilst Firebase connects
@@ -85,6 +90,8 @@ const App = () => {
   const dispatch = useDispatch();
   const userData = useSelector(state => state.user.userData);
   const user = useSelector(state => state.user.user);
+
+  const dynamicMode = useSelector(state => state.dynamicMode.enabled);
 
   // Handle user state changes
   function onAuthStateChanged(user: any) {
@@ -132,6 +139,8 @@ const App = () => {
     const unsubscribe = auth().onAuthStateChanged(onAuthStateChanged);
   }, []);
 
+  
+
   if (initializing) return null;
 
 
@@ -139,6 +148,9 @@ const App = () => {
     <>
     <NavigationContainer>
       <ThemeProvider theme={appTheme}>
+        { dynamicMode &&
+          <AmbientLightListen/>
+        }
         {!user ? (
           <View>
             <View style={styles.inputView}>

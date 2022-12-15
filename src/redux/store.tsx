@@ -1,9 +1,12 @@
 import { combineReducers } from 'redux';
 import { configureStore } from '@reduxjs/toolkit';
 import user from './user';
+import newPost from './newPost';
+import dynamicMode from './dynamicMode';
+
 
 const rootReducer = combineReducers(
-    { user }
+    { user, newPost, dynamicMode }
 );
 
 const buildStore = () => {
