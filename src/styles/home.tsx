@@ -17,6 +17,9 @@ const homeStyles = makeStyles((theme: ThemeOptions) => ({
     emptyListText: {
         color: theme.colors.black,
         fontSize: 20,
+    },
+    speedDial: {
+        color: theme.colors.primary,
     }
 
 }));

@@ -14,7 +14,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
-
+import storage from '@react-native-firebase/storage';
 
 import styles from '../../src/styles/style';
 
@@ -23,6 +23,8 @@ import PostItem from '../components/PostItem';
 import { useDispatch, useSelector } from 'react-redux';
 
 import homeStyles from '../styles/home';
+
+import { CommonActions } from '@react-navigation/native';
 
 
 const HomeScreen = (props: any) => {
@@ -35,43 +37,56 @@ const HomeScreen = (props: any) => {
     const theme = useTheme();
 
     const storeState = useSelector(state => state);
-    const user = useSelector(state => state.user.user);
-    const userData = useSelector(state => state.user.userData);
+    const user = useSelector((state: any) => state.user.user);
+    const userData = useSelector((state: any) => state.user.userData);
 
     const screenDimensions = Dimensions.get('screen');
 
     const styles = homeStyles(props);
 
     useEffect(() => {
-        getPosts(user);
-    }, []);
+        getPosts(user, userData);
+    }, [userData]);
 
     const refreshPosts = useCallback(() => {
-        getPosts(user);
+        getPosts(user, userData);
     }, []);
 
-    async function getPosts(user: any) {
+    async function getPosts(user: any, userData: any) {
         if (!user) return;
 
         setLoadingPosts(true);
+
+        if (!userData)
+            return;
 
 
         return firestore()
             .collection('posts')
             .where('creator', '==', user.uid)
+            //.where('creator', 'in', userData.following)
             .onSnapshot(postsSnapshot => {
                 let newPosts: any = [];
                 let postPromises: Promise<void | FirebaseFirestoreTypes.DocumentSnapshot<FirebaseFirestoreTypes.DocumentData>>[] = [];
 
                 postsSnapshot.forEach(postSnap => {
                     let postData = postSnap.data();
+
                     postPromises.push(
                         firestore()
                             .collection('users')
                             .doc(postData.creator)
                             .get()
-                            .then(postCreator => {
+                            .then(async postCreator => {
+
+                                if (postData.image && postData.image != "") {
+                                    const postImageUrl = await storage().ref(postData.image).getDownloadURL();
+                                    postData.image = postImageUrl;
+                                }
+
                                 postData.creator = postCreator.data();
+                                const profilePicUrl = await storage().ref(postData.creator.photoURL).getDownloadURL();
+                                postData.creator.photoURL = profilePicUrl;
                                 newPosts = [...newPosts, postData];
                             }));
                 });
@@ -89,10 +104,10 @@ const HomeScreen = (props: any) => {
         return (
             <SpeedDial
                 isOpen={speedDialOpen}
-                color={"#000"}
-                icon={<Icon reverse
+                color={styles.speedDial.color}
+                icon={<Icon
                     size={20}
-                    color={"#000"}
+                    color={styles.speedDial.color}
                     iconStyle={{ color: "#fff" }}
                     name='pen-nib'
                     type='font-awesome-5'
@@ -102,16 +117,30 @@ const HomeScreen = (props: any) => {
                 onClose={() => setSpeedDialOpen(!speedDialOpen)}
             >
                 <SpeedDial.Action
-                    color={"#000"}
+                    color={styles.speedDial.color}
                     icon={{ name: 'add', color: '#fff' }}
-                    title="Add"
-                    onPress={() => props.navigation.push("CreatePost")}
+                    title="Add Post"
+                    onPress={() => { setSpeedDialOpen(false); props.navigation.push("CreatePost"); }}
                 />
                 <SpeedDial.Action
-                    color={"#000"}
-                    icon={{ name: 'delete', color: '#fff' }}
-                    title="Delete"
-                    onPress={() => console.log('Delete Something')}
+                    color={styles.speedDial.color}
+                    icon={{ name: 'image', color: '#fff' }}
+                    title="Image"
+                    onPress={() => {
+                        setSpeedDialOpen(false);
+                        props.navigation.dispatch(
+                            CommonActions.reset({
+                                index: 1,
+                                routes: [
+                                    { name: 'Home' },
+                                    { name: 'CreatePost' },
+                                    {
+                                        name: 'AddImage',
+                                    },
+                                ],
+                            })
+                        );
+                    }}
                 />
             </SpeedDial>
         );
@@ -164,7 +193,7 @@ const HomeScreen = (props: any) => {
 
             <FlatList
                 keyExtractor={keyExtractor}
-                contentContainerStyle={{flexGrow:1}}
+                contentContainerStyle={{ flexGrow: 1 }}
                 data={posts}
                 renderItem={(postItem) => { return <PostItem post={postItem.item} /> }}
                 refreshControl={

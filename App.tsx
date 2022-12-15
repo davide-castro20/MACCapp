@@ -61,6 +61,7 @@ import Toast from 'react-native-toast-message';
 
 import { DEFAULT_AVATAR } from './src/images';
 
+import storage from '@react-native-firebase/storage';
 
 
 const appTheme = createTheme({
@@ -118,13 +119,16 @@ const App = () => {
       .collection('users')
       .doc(user.uid)
       .get()
-      .then(newUserData => {
+      .then(async newUserData => {
 
         let userDataDocument = newUserData.data();
         if (!userDataDocument.photoURL || userDataDocument.photoURL == "") {
           userDataDocument.photoURL = Image.resolveAssetSource(DEFAULT_AVATAR).uri;
+        } else {
+          const url = await storage().ref(userDataDocument.photoURL).getDownloadURL();
+          userDataDocument.photoURL = url;
         }
-        
+
         dispatch(setUserData(userDataDocument));
         setLoadingUser(false);
       });
@@ -197,14 +201,14 @@ const App = () => {
                         onPress={() => navigation.push("UserMenu")}
                       />
                     ),
-                    headerRight: () => (
-                      <Icon reverse
-                        size={20}
-                        name='pen-nib'
-                        type='font-awesome-5'
-                        onPress={() => navigation.push("CreatePost")}
-                      />
-                    ),
+                    // headerRight: () => (
+                    //   <Icon reverse
+                    //     size={20}
+                    //     name='pen-nib'
+                    //     type='font-awesome-5'
+                    //     onPress={() => navigation.push("CreatePost")}
+                    //   />
+                    // ),
                   })} />
                 <Stack.Screen name="UserMenu" component={UserMenuScreen}
                   options={({ navigation }) => ({
