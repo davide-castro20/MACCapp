@@ -30,6 +30,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 
+import java.util.Objects;
+
 
 public class LocationModule extends ReactContextBaseJavaModule {
 
@@ -46,7 +48,7 @@ public class LocationModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void convertToLocation(int latitude, int longitude, Promise promise) {
+    public void convertToLocation(float latitude, float longitude, Promise promise) {
         Log.d("Location", "");
 
 
@@ -66,9 +68,11 @@ public class LocationModule extends ReactContextBaseJavaModule {
                             Log.d("GetLocationNameFAILED",task.getException().toString());
 
                         } else {
-                            Log.d("LOCATION SUCCESS", task.getResult().getAsJsonArray().toString());
+                            Log.d("LOCATION SUCCESS", task.getResult().getAsJsonObject().toString());
 
-                            promise.resolve(task.getResult().getAsJsonArray().get(0).toString());
+                            if (Objects.equals(task.getResult().getAsJsonObject().get("status").getAsString(), "ZERO_RESULTS"))
+                                promise.resolve(null);
+                            promise.resolve(task.getResult().getAsJsonObject().get("results").getAsJsonArray().get(0).toString());
                         }
                     }
                 });
