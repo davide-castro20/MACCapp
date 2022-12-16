@@ -10,6 +10,9 @@ const postStyles = makeStyles((theme: ThemeOptions) => ({
     rightHeader: {
 
     },
+    itemContainer: {
+        paddingBottom: 7,
+    },
     text: {
         fontSize: 15
     },
@@ -38,6 +41,22 @@ const postStyles = makeStyles((theme: ThemeOptions) => ({
         padding: 0,
         borderRadius: 8,
         elevation: 5,
+    },
+    footer: {
+        marginTop: 7,
+        flex: 1, 
+        width: "100%", 
+        flexDirection: 'row', 
+        justifyContent:'space-between',
+    },
+    footerText: {
+        color: theme.colors.grey2
+    },
+    locationIcon: {
+        color: theme.colors.grey2
+    },
+    locationIconContainer: {
+        marginRight: 5
     }
 }));
 

@@ -19,6 +19,7 @@ type Post = {
     faces: Face[],
     tags: string[]
     text: string,
+    location: string,
     //TODO
 }
 
@@ -40,16 +41,17 @@ const Post = (props: any) => {
     const windowHeight = Dimensions.get('window').height;
 
     const [overlayVisible, setOverlayVisible] = useState(false);
+    
 
     const onLayout = useCallback((event: any) => {
         const containerWidth = event.nativeEvent.layout.width;
-        
-          Image.getSize(post.image, (w, h) => {
+
+        Image.getSize(post.image, (w, h) => {
 
             let width = containerWidth;
 
             let height = width * h / w;
-            let excessHeight = (windowHeight/3)/height;
+            let excessHeight = (windowHeight / 3) / height;
 
             if (excessHeight < 1) {
                 width *= (excessHeight);
@@ -58,8 +60,8 @@ const Post = (props: any) => {
 
             setWidth(width);
             setHeight(height);
-          });
-        
+        });
+
     }, []);
 
     const onLayoutOverlay = useCallback((event: any) => {
@@ -70,7 +72,7 @@ const Post = (props: any) => {
             let width = containerWidth;
 
             let height = width * h / w;
-            let excessHeight = (windowHeight*0.9)/height;
+            let excessHeight = (windowHeight * 0.9) / height;
 
             if (excessHeight < 1) {
                 width *= (excessHeight);
@@ -79,8 +81,8 @@ const Post = (props: any) => {
 
             setOverlayWidth(width);
             setOverlayHeight(height);
-          });
-        
+        });
+
     }, []);
 
     const toggleOverlay = () => {
@@ -89,42 +91,64 @@ const Post = (props: any) => {
 
     return (
         <>
-        <ListItem bottomDivider style={{paddingRight: "10%"}} >
-            <Avatar source={{ uri: photo }} rounded={true} containerStyle={{alignSelf: 'flex-start', marginTop: 5}} />
-            <ListItem.Content style={{ width: "100%" }}>
-                <ListItem.Title style={styles.header}>
-                    <Text style={styles.name}>{post.creator.firstName} {post.creator.lastName}</Text>
-                    <Text style={styles.username}>{" @"}{post.creator.username}</Text>
-                </ListItem.Title>
+            <ListItem bottomDivider containerStyle={styles.itemContainer} >
+                <Avatar source={{ uri: photo }} rounded={true} containerStyle={{ alignSelf: 'flex-start', marginTop: 5 }} />
+                <ListItem.Content style={{ width: "100%", paddingRight: "10%"}}>
+                    <ListItem.Title style={styles.header}>
+                        <Text style={styles.name}>{post.creator.firstName} {post.creator.lastName}</Text>
+                        <Text style={styles.username}>{" @"}{post.creator.username}</Text>
+                    </ListItem.Title>
 
-                {post.text != "" &&
+                    {post.text != "" &&
 
-                    <ListItem.Subtitle style={styles.text}>{post.text}</ListItem.Subtitle>
-                }
+                        <ListItem.Subtitle style={styles.text}>{post.text}</ListItem.Subtitle>
+                    }
 
-                {post.image && post.image != "" &&
+                    {post.image && post.image != "" &&
 
-                    <View style={styles.imageDiv} onLayout={onLayout}>
-                        <Image
-                        containerStyle={{...styles.imageContainer, width: "100%", height: height}}
-                        source={{ uri: post.image }} 
-                        resizeMode="cover"
-                        onPress={() => toggleOverlay()}
-                        />
-                    </View>
-                }
+                        <View style={styles.imageDiv} onLayout={onLayout}>
+                            <Image
+                                containerStyle={{ ...styles.imageContainer, width: "100%", height: height }}
+                                source={{ uri: post.image }}
+                                resizeMode="cover"
+                                onPress={() => toggleOverlay()}
+                            />
+                        </View>
+                    }
 
-            </ListItem.Content>
-        </ListItem>
+                    {
+                        <View style={styles.footer}> 
+                            {
+                                post.location && post.location != "" &&
+                                <Icon
+                                    size={15}
+                                    iconStyle={styles.locationIcon}
+                                    containerStyle={styles.locationIconContainer}
+                                    name='map-marker-alt'
+                                    type='font-awesome-5'
+                                />
+                            }
+                            <Text 
+                                style={{...styles.footerText, paddingRight: 40, flex: 1, flexWrap: 'wrap'}} 
+                                ellipsizeMode={'tail'} numberOfLines={1}
+                            >
+                                {post.location}
+                            </Text>
+                            <Text style={styles.footerText}>01/12 · 15:60</Text>
+                        </View>
+                    }
 
-        <Overlay isVisible={overlayVisible} onBackdropPress={toggleOverlay} overlayStyle={{width: (windowWidth * 0.85), ...styles.overlayStyle}}>
-            <View onLayout={onLayoutOverlay} style={{width: "100%"}}>
-                <Image
-                    containerStyle={{...styles.imageContainer, width: overlayWidth, height: overlayHeight, ...styles.overlayImageContainer}}
-                    source={{ uri: post.image }} 
-                    resizeMode="contain"/>
-            </View>
-        </Overlay>
+                </ListItem.Content>
+            </ListItem>
+
+            <Overlay isVisible={overlayVisible} onBackdropPress={toggleOverlay} overlayStyle={{ width: (windowWidth * 0.85), ...styles.overlayStyle }}>
+                <View onLayout={onLayoutOverlay} style={{ width: "100%" }}>
+                    <Image
+                        containerStyle={{ ...styles.imageContainer, width: overlayWidth, height: overlayHeight, ...styles.overlayImageContainer }}
+                        source={{ uri: post.image }}
+                        resizeMode="contain" />
+                </View>
+            </Overlay>
         </>
     );
 };
