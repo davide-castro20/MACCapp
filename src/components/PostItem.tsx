@@ -1,4 +1,7 @@
-import { ListItem, Avatar, SpeedDial, Icon, Text } from '@rneui/themed'
+import { View, Dimensions } from 'react-native';
+import { useCallback, useState } from 'react';
+
+import { ListItem, Avatar, SpeedDial, Icon, Text, Image, Overlay, Button } from '@rneui/themed'
 
 import { Face } from '../types';
 
@@ -9,11 +12,12 @@ type Post = {
         photoURL: string,
         firstName: string,
         lastName: string,
-        imageURL: string,
         username: string,
-        faces: Face[],
-        tags: string[]
+
     },
+    image: string,
+    faces: Face[],
+    tags: string[]
     text: string,
     //TODO
 }
@@ -26,17 +30,102 @@ const Post = (props: any) => {
 
     let photo = post.creator.photoURL == null ? "" : post.creator.photoURL;
 
+    const [width, setWidth] = useState(0);
+    const [height, setHeight] = useState(0);
+
+    const [overlayWidth, setOverlayWidth] = useState(0);
+    const [overlayHeight, setOverlayHeight] = useState(0);
+
+    const windowWidth = Dimensions.get('window').width;
+    const windowHeight = Dimensions.get('window').height;
+
+    const [overlayVisible, setOverlayVisible] = useState(false);
+
+    const onLayout = useCallback((event: any) => {
+        const containerWidth = event.nativeEvent.layout.width;
+        
+          Image.getSize(post.image, (w, h) => {
+
+            let width = containerWidth;
+
+            let height = width * h / w;
+            let excessHeight = (windowHeight/3)/height;
+
+            if (excessHeight < 1) {
+                width *= (excessHeight);
+                height = width * h / w;
+            }
+
+            setWidth(width);
+            setHeight(height);
+          });
+        
+    }, []);
+
+    const onLayoutOverlay = useCallback((event: any) => {
+        const containerWidth = event.nativeEvent.layout.width;
+
+        Image.getSize(post.image, (w, h) => {
+
+            let width = containerWidth;
+
+            let height = width * h / w;
+            let excessHeight = (windowHeight*0.9)/height;
+
+            if (excessHeight < 1) {
+                width *= (excessHeight);
+                height = width * h / w;
+            }
+
+            setOverlayWidth(width);
+            setOverlayHeight(height);
+          });
+        
+    }, []);
+
+    const toggleOverlay = () => {
+        setOverlayVisible(!overlayVisible);
+    };
+
     return (
-        <ListItem bottomDivider >
-            <Avatar source={{ uri: photo }} rounded={true} />
-            <ListItem.Content>
+        <>
+        <ListItem bottomDivider style={{paddingRight: "10%"}} >
+            <Avatar source={{ uri: photo }} rounded={true} containerStyle={{alignSelf: 'flex-start', marginTop: 5}} />
+            <ListItem.Content style={{ width: "100%" }}>
                 <ListItem.Title style={styles.header}>
                     <Text style={styles.name}>{post.creator.firstName} {post.creator.lastName}</Text>
                     <Text style={styles.username}>{" @"}{post.creator.username}</Text>
                 </ListItem.Title>
-                <ListItem.Subtitle style={styles.text}>{post.text}</ListItem.Subtitle>
+
+                {post.text != "" &&
+
+                    <ListItem.Subtitle style={styles.text}>{post.text}</ListItem.Subtitle>
+                }
+
+                {post.image && post.image != "" &&
+
+                    <View style={styles.imageDiv} onLayout={onLayout}>
+                        <Image
+                        containerStyle={{...styles.imageContainer, width: "100%", height: height}}
+                        source={{ uri: post.image }} 
+                        resizeMode="cover"
+                        onPress={() => toggleOverlay()}
+                        />
+                    </View>
+                }
+
             </ListItem.Content>
         </ListItem>
+
+        <Overlay isVisible={overlayVisible} onBackdropPress={toggleOverlay} overlayStyle={{width: (windowWidth * 0.85), ...styles.overlayStyle}}>
+            <View onLayout={onLayoutOverlay} style={{width: "100%"}}>
+                <Image
+                    containerStyle={{...styles.imageContainer, width: overlayWidth, height: overlayHeight, ...styles.overlayImageContainer}}
+                    source={{ uri: post.image }} 
+                    resizeMode="contain"/>
+            </View>
+        </Overlay>
+        </>
     );
 };
 

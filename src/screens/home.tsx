@@ -57,8 +57,9 @@ const HomeScreen = (props: any) => {
 
         setLoadingPosts(true);
 
-        if (!userData)
+        if (!userData) {
             return;
+        }
 
 
         return firestore()
@@ -92,6 +93,7 @@ const HomeScreen = (props: any) => {
                 });
 
                 Promise.all(postPromises).then(() => {
+                    console.log("wowow")
                     setPosts(newPosts);
                     setLoadingPosts(false);
                 })

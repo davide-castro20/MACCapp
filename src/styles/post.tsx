@@ -22,6 +22,23 @@ const postStyles = makeStyles((theme: ThemeOptions) => ({
         color: theme.colors.grey2,
         fontSize: 14
     },
+    image: {
+    },
+    imageContainer: {
+        borderRadius: 8
+    },
+    imageDiv: {
+        width: "100%",
+        marginTop: 5
+    },
+    overlayImageContainer: {
+    },
+    overlayStyle: {
+        backgroundColor:'transparent', 
+        padding: 0,
+        borderRadius: 8,
+        elevation: 5,
+    }
 }));
 
 export default postStyles;
