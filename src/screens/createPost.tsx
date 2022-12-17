@@ -72,8 +72,8 @@ const CreatePostScreen = (props: any) => {
 
             console.log(info)
 
-            //let location = await getLocationName(info.coords.latitude, info.coords.longitude);
-            //location = location ? JSON.parse(location) : null;
+            // let location = await getLocationName(info.coords.latitude, info.coords.longitude);
+            // location = location ? JSON.parse(location) : null;
 
 
             let imageReference = null;
@@ -92,8 +92,8 @@ const CreatePostScreen = (props: any) => {
                 text: postText,
                 tags: postTags.split(" "),
                 creation_date: firestore.FieldValue.serverTimestamp(),
-                image: imageReference?.fullPath,
-                //location: location ? location['formatted_address'] : null,
+                image: imageReference ? imageReference.fullPath : null,
+                // location: location ? location['formatted_address'] : null,
             };
 
             console.log(post);

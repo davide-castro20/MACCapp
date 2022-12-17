@@ -73,6 +73,13 @@ const HomeScreen = (props: any) => {
                 postsSnapshot.forEach(postSnap => {
                     let postData = postSnap.data();
 
+              
+                    // In the case the post is just created, the date is not available yet in the first snapshot 
+                    // because it is created by firebase serverside
+                    if (postData.creation_date) {
+                        postData.creation_date = postData.creation_date.toDate();
+                    }
+
                     postPromises.push(
                         firestore()
                             .collection('users')
@@ -93,7 +100,6 @@ const HomeScreen = (props: any) => {
                 });
 
                 Promise.all(postPromises).then(() => {
-                    console.log("wowow")
                     setPosts(newPosts);
                     setLoadingPosts(false);
                 })

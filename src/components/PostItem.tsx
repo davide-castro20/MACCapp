@@ -20,6 +20,7 @@ type Post = {
     tags: string[]
     text: string,
     location: string,
+    creation_date: Date
     //TODO
 }
 
@@ -62,7 +63,7 @@ const Post = (props: any) => {
             setHeight(height);
         });
 
-    }, []);
+    }, [post.image]);
 
     const onLayoutOverlay = useCallback((event: any) => {
         const containerWidth = event.nativeEvent.layout.width;
@@ -83,7 +84,7 @@ const Post = (props: any) => {
             setOverlayHeight(height);
         });
 
-    }, []);
+    }, [post.image]);
 
     const toggleOverlay = () => {
         setOverlayVisible(!overlayVisible);
@@ -134,7 +135,19 @@ const Post = (props: any) => {
                             >
                                 {post.location}
                             </Text>
-                            <Text style={styles.footerText}>01/12 · 15:60</Text>
+                            <Text style={styles.footerText}>
+                                {post.creation_date && 
+                                    <>
+                                    {String(post.creation_date.getDate()).padStart(2,'0')}
+                                    /
+                                    {String(post.creation_date.getMonth() + 1).padStart(2,'0')}
+                                    {' · '}
+                                    {String(post.creation_date.getHours()).padStart(2,'0')}
+                                    :
+                                    {String(post.creation_date.getMinutes()).padStart(2,'0')}
+                                    </>
+                                }
+                            </Text>
                         </View>
                     }
 
