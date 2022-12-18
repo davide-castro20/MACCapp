@@ -113,18 +113,23 @@ const CreatePostScreen = (props: any) => {
                     props.navigation.goBack();
                 });
         },
-            error => {
-                console.log(error);
+        error => {
+            console.log(error);
 
-                Toast.show({
-                    type: 'error',
-                    text1: 'Error creating post',
-                    text2: 'Please try again later',
-                });
-                
-                
-                setCreatingPost(false);
+            Toast.show({
+                type: 'error',
+                text1: 'Error creating post',
+                text2: 'Please try again later',
             });
+            
+            
+            setCreatingPost(false);
+        },
+        {
+            maximumAge: 0,
+            timeout: 20000,
+            enableHighAccuracy: true,
+        });
     };
 
     return (
