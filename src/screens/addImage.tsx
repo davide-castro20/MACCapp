@@ -37,7 +37,7 @@ import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firest
 import { Face } from '../types';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { setNewImage, setNewLabels, setNewFaces } from '../redux/newPost';
+import { setNewImage, setNewLabels, setNewFaces, setImagePreview } from '../redux/newPost';
 
 type ImageDimensions = {
     width: number,
@@ -80,6 +80,7 @@ const AddImageScreen = (props: any) => {
 
     const submitNewImage = () => {
         dispatch(setNewImage(response.assets[0].uri));
+        dispatch(setImagePreview(imageDimensions?.width/imageDimensions?.height));
         dispatch(setNewLabels(labels));
         dispatch(setNewFaces(Array.from(faces.values())));
         props.navigation.goBack();
@@ -128,14 +129,19 @@ const AddImageScreen = (props: any) => {
     const identifyLabels = async (uri: string) => {
         if (uri) {
             try {
-                //const labelsResponse = await labelImage(uri);
+                const labelsResponse = await labelImage(uri);
                 setLabelsReady(true);
-                //setLabels(labelsResponse);
 
-                // for (let label of labelsResponse) {
-                //     console.log("Label:");
-                //     console.log(label);
-                // }
+                let newLabels : string[] = [];
+
+                for (let label of labelsResponse) {
+                    console.log("Label:");
+                    console.log(label);
+                    newLabels = [...newLabels, label.text];
+                }
+
+                setLabels(newLabels);
+
             } catch (error) {
                 console.log("Labeling error: " + error);
             }

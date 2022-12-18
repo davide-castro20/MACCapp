@@ -5,9 +5,11 @@ import {
     RefreshControl,
     ScrollView,
     SafeAreaView,
+    useWindowDimensions,
+    Pressable,
 } from 'react-native';
 
-import { Button, Text, Input, Dialog, Image, Divider, useTheme } from '@rneui/themed';
+import { Button, Text, Input, Dialog, Image, Divider, useTheme, Chip } from '@rneui/themed';
 
 import React, { useState, useEffect, useCallback } from 'react';
 
@@ -21,7 +23,7 @@ import Geolocation from '@react-native-community/geolocation';
 import { getLocationName } from '../location';
 
 import Toast from 'react-native-toast-message';
-import newPost from '../redux/newPost';
+import newPost, { setNewLabels, removeLabel } from '../redux/newPost';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -40,15 +42,40 @@ const CreatePostScreen = (props: any) => {
     const [postTags, setPostTags] = useState("");
     const [creatingPost, setCreatingPost] = useState(false);
 
+    const [newTag, setNewTag] = useState("");
+    const [imagePreviewHeight, setImagePreviewHeight] = useState(0);
+
     const image = useSelector((state: any) => state.newPost.image);
     const labels = useSelector((state: any) => state.newPost.labels);
     const faces = useSelector((state: any) => state.newPost.faces);
+    const imagePreview = useSelector((state: any) => state.newPost.imagePreview);
+
 
     const styles = createPostStyles(props);
-    
+
     const dispatch = useDispatch();
 
     const theme = useTheme();
+
+    const addTag = () => {
+        if (labels == null || !labels.includes(newTag)) {
+            dispatch(setNewLabels([newTag]));
+        }
+
+        setNewTag("");
+
+        console.log(labels)
+    }
+
+    const imagePreviewLayout = useCallback((event: any) => {
+
+        const containerWidth = event.nativeEvent.layout.width;
+
+        let aspectRatio = imagePreview;
+
+
+        setImagePreviewHeight(containerWidth / aspectRatio);
+    }, [image]);
 
     const createPost = () => {
         if (!auth().currentUser) return;
@@ -62,7 +89,7 @@ const CreatePostScreen = (props: any) => {
                 text1: 'Error creating post',
                 text2: 'You must add text or an image!',
             });
-        
+
             setCreatingPost(false);
             return;
         }
@@ -113,38 +140,39 @@ const CreatePostScreen = (props: any) => {
                     props.navigation.goBack();
                 });
         },
-        error => {
-            console.log(error);
+            error => {
+                console.log(error);
 
-            Toast.show({
-                type: 'error',
-                text1: 'Error creating post',
-                text2: 'Please try again later',
+                Toast.show({
+                    type: 'error',
+                    text1: 'Error creating post',
+                    text2: 'Please try again later',
+                });
+
+
+                setCreatingPost(false);
+            },
+            {
+                maximumAge: 0,
+                timeout: 20000,
+                enableHighAccuracy: true,
             });
-            
-            
-            setCreatingPost(false);
-        },
-        {
-            maximumAge: 0,
-            timeout: 20000,
-            enableHighAccuracy: true,
-        });
     };
 
     return (
-        <View style={styles.backgroundPage}>
+        <ScrollView contentContainerStyle={styles.backgroundPage}>
             <Dialog
                 isVisible={creatingPost}
                 overlayStyle={styles.loadingDialogContainer}
             >
                 <Dialog.Loading loadingStyle={styles.loadingLoadingStyle} />
             </Dialog>
-            
+
             <View style={styles.inputGroup}>
-                <View style={styles.inputView}>
+                <View style={styles.inputViewPost}>
                     <Input
                         style={styles.textInput}
+                        containerStyle={styles.textInputContainer}
                         placeholder="What are you thinking?..."
                         placeholderTextColor="#003f5c"
                         onChangeText={text => setPostText(text)}
@@ -153,47 +181,92 @@ const CreatePostScreen = (props: any) => {
                         multiline={true}
                     />
                 </View>
-                <View style={styles.inputView}>
+                <View style={styles.inputViewTags}>
                     <Input
                         style={styles.textInput}
+                        containerStyle={styles.tagsInputContainer}
                         placeholder="Add tag..."
                         placeholderTextColor="#003f5c"
                         disabled={creatingPost}
-                        onChangeText={tags => setPostTags(tags)}
+                        value={newTag}
+                        onChangeText={textTag => setNewTag(textTag)}
+                        onSubmitEditing={() => { console.log("wtf"); addTag() }}
                     />
                 </View>
-            </View>
 
-            <Divider width={2} color={theme.theme.colors.grey3}/>
+                {labels &&
+                    <View style={styles.tagsView}>
+                        {
+                            labels?.map((label: string) => {
+                                return (
+                                    <Chip
+                                        title={label}
+                                        size='sm'
+                                        containerStyle={{ alignSelf: 'flex-start', marginHorizontal: 3, marginTop: 5 }}
+                                        icon={{
+                                            name: 'times',
+                                            type: 'font-awesome-5',
+                                            size: 15,
+                                            onPress: () => {
+                                                dispatch(removeLabel(label));
+                                            }
+                                        }}
+                                    />
+                                );
+                            })
+                        }
+                    </View>
+                }
+
+            </View>
 
             {
-                image &&
-                <>
-                <View style={styles.imagePreviewBackground}>
-                    <View style={styles.imagePreviewContainer}>
-                        <Image
-                            style={styles.imagePreview}
-                            source={{uri: image}}
-                            resizeMode={'contain'}
-                            />
-                    </View>
-                </View>
+                image ?
+                    (
+                        <>
+                            <Divider width={1} color={"#003f5c"} style={{ marginBottom: 0, marginTop: 20 }} />
+                            <View style={{ ...styles.imagePreviewBackground, height: imagePreviewHeight }} onLayout={imagePreviewLayout}>
+                                <View style={styles.imagePreviewContainer}>
+                                    <Image
+                                        style={styles.imagePreview}
+                                        source={{ uri: image }}
+                                        resizeMode={'contain'}
+                                    />
+                                </View>
+                            </View>
 
-                <Divider width={2} color={theme.theme.colors.grey3}/>
-                </>
+                        </>
+                    ) : (
+                        <View style={styles.imageInput}>
+                            <Pressable
+                                style={styles.imageButton}
+                                disabled={creatingPost}
+                                onPress={() => { props.navigation.push("AddImage") }}
+                            >
+                                <Text style={{ textAlign: 'center' }}>Add Image</Text>
+                            </Pressable>
+                        </View>
+                    )
             }
 
-            <View>
-                {   !image ? (
-                    <Button type="solid" disabled={creatingPost} title="Add Image" onPress={() => { props.navigation.push("AddImage") }} />
-
-                ) : (
-                    <Button type="outline" disabled={creatingPost} title="Change Image" onPress={() => { props.navigation.push("AddImage") }} />
-                )
+            <View style={styles.buttonsView}>
+                {image &&
+                    <Button
+                        type="outline"
+                        style={styles.changeImage}
+                        disabled={creatingPost}
+                        title="Change Image"
+                        onPress={() => { props.navigation.push("AddImage") }}
+                    />
                 }
-                <Button type="solid" disabled={creatingPost} title="Create Post" onPress={createPost} />
+                <Button
+                    type="solid"
+                    containerStyle={styles.createButton}
+                    disabled={creatingPost}
+                    title="Create Post"
+                    onPress={createPost} />
             </View>
-        </View>
+        </ScrollView>
     );
 };
 

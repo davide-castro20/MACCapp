@@ -6,19 +6,33 @@ const createPostStyles = makeStyles((theme: ThemeOptions) => ({
     textInput: {
         color: theme.colors.black,
     },
-    inputView: {
+    inputViewPost: {
         borderRadius: 30,
         width: '100%',
-        height: 45,
-        marginBottom: 20,
+        marginBottom: 10,
+        alignItems: 'center',
+    },
+    inputViewTags: {
+        borderRadius: 30,
+        width: '100%',
         alignItems: 'center',
     },
     inputGroup: {
-        width: "100%"
+        marginLeft: "5%",
+        marginRight: "5%",
+        flex: 1,
+        justifyContent: 'space-between'
+    },
+    textInputContainer: {
+        flex: 1,
+    },
+    tagsInputContainer: {
+
     },
     backgroundPage: {
         backgroundColor: theme.colors.background,
-        flex:1,
+        justifyContent: 'space-between',
+        flexGrow: 1,
     },
     loadingDialogBackdrop: {
         backgroundColor: theme.colors.grey2,
@@ -40,15 +54,43 @@ const createPostStyles = makeStyles((theme: ThemeOptions) => ({
         color: theme.colors.primary,
     },
     imagePreviewBackground: {
-        flex: 1,
-        backgroundColor: theme.colors.grey3,
+        backgroundColor: theme.colors.background,
+        marginHorizontal: "10%",
+        marginVertical: 10,
     },
     imagePreviewContainer: {
-        flex: 1,
-        marginHorizontal: "10%",
     },
     imagePreview: {
-        height: "100%"
+        height: "100%",
+        borderRadius: 8,
+    },
+    imageButton: {
+        width: "100%",
+        flexGrow: 1,
+        justifyContent: 'center',
+        borderColor: theme.colors.black,
+        borderWidth: 0.5,
+        borderRadius: 8
+    },
+    imageInput: {
+        flex: 1,
+        marginHorizontal: "5%"
+    },
+    createButton: {
+        width: "100%",
+    },
+    changeImage: {
+        marginBottom: 10,
+    },
+    tagsView: {
+        flex: 1,
+        flexDirection: 'row',
+        marginHorizontal: "5%",
+        flexWrap: 'wrap'
+    },
+    buttonsView: {
+        marginVertical: 10,
+        marginHorizontal: "5%",
     },
 }));
 
