@@ -63,6 +63,8 @@ import { DEFAULT_AVATAR } from './src/images';
 
 import storage from '@react-native-firebase/storage';
 
+import { resetNewPost } from './src/redux/newPost';
+
 
 const appTheme = createTheme({
   mode: 'dark',
@@ -234,7 +236,10 @@ const App = () => {
                         size={20}
                         name='arrow-left'
                         type='font-awesome-5'
-                        onPress={() => navigation.goBack()}
+                        onPress={() => {
+                          dispatch(resetNewPost());
+                          navigation.goBack();
+                        }}
                       />
                     ),
                   })} />

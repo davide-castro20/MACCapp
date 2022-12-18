@@ -18,6 +18,7 @@ const createPostStyles = makeStyles((theme: ThemeOptions) => ({
         alignItems: 'center',
     },
     inputGroup: {
+        marginTop: 10,
         marginLeft: "5%",
         marginRight: "5%",
         flex: 1,

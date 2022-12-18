@@ -7,7 +7,7 @@ const newPostSlice = createSlice({
         image: null,
         imagePreview: null,
         labels: null,
-        faces: null,
+        faces: ["wow"],
     },
     reducers: {
         imageAdded: (state, action) => {
@@ -39,6 +39,7 @@ const newPostSlice = createSlice({
         },
         reset: (state) => {
             state.image = null;
+            state.imagePreview = null;
             state.labels = null;
             state.faces = null;
         },
@@ -83,7 +84,7 @@ export const removeLabel = ( label ) => async dispatch => {
 
 export const setNewFaces = ( faces ) => async dispatch => {
     try {
-        dispatch(facesAdded(faces));
+        dispatch(facesAdded({ faces }));
     } catch (e) {
         return console.error(e.message);
     }

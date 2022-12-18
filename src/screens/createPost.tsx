@@ -61,10 +61,7 @@ const CreatePostScreen = (props: any) => {
         if (labels == null || !labels.includes(newTag)) {
             dispatch(setNewLabels([newTag]));
         }
-
         setNewTag("");
-
-        console.log(labels)
     }
 
     const imagePreviewLayout = useCallback((event: any) => {
@@ -113,11 +110,11 @@ const CreatePostScreen = (props: any) => {
                 await imageReference.putFile(pathToFile);
             }
 
-
             let post = {
                 creator: auth().currentUser?.uid,
                 text: postText,
-                tags: postTags.split(" "),
+                tags: labels,
+                faces: faces,
                 creation_date: firestore.FieldValue.serverTimestamp(),
                 image: imageReference ? imageReference.fullPath : null,
                 // location: location ? location['formatted_address'] : null,
@@ -190,7 +187,7 @@ const CreatePostScreen = (props: any) => {
                         disabled={creatingPost}
                         value={newTag}
                         onChangeText={textTag => setNewTag(textTag)}
-                        onSubmitEditing={() => { console.log("wtf"); addTag() }}
+                        onSubmitEditing={() => { addTag() }}
                     />
                 </View>
 
