@@ -66,11 +66,12 @@ const HomeScreen = (props: any) => {
             .collection('posts')
             .where('creator', '==', user.uid)
             //.where('creator', 'in', userData.following)
+            .orderBy('creation_date', 'desc')
             .onSnapshot(postsSnapshot => {
                 let newPosts: any = [];
                 let postPromises: Promise<void | FirebaseFirestoreTypes.DocumentSnapshot<FirebaseFirestoreTypes.DocumentData>>[] = [];
 
-                postsSnapshot.forEach(postSnap => {
+                postsSnapshot?.forEach(postSnap => {
                     let postData = postSnap.data();
 
               

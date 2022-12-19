@@ -2,7 +2,7 @@ import { color } from '@rneui/base';
 import { makeStyles, ThemeOptions } from '@rneui/themed';
 import { StyleSheet } from 'react-native';
 
-const styles = StyleSheet.create({
+const createAppStyles = makeStyles((theme: ThemeOptions) => ({
     sectionContainer: {
         marginTop: 32,
         paddingHorizontal: 24,
@@ -20,7 +20,9 @@ const styles = StyleSheet.create({
         fontWeight: '700',
     },
     box: {},
-    textInput: {},
+    textInput: {
+        color: '#000'
+    },
     inputView: {
         borderRadius: 30,
         width: '70%',
@@ -33,7 +35,24 @@ const styles = StyleSheet.create({
     },
     headerTitle: {
         color: '#fff',
-    }
-});
+    },
 
-export default styles;
+    loginPage: {
+        backgroundColor: "#fff",
+        flex: 1,
+        justifyContent: 'center',
+        paddingHorizontal: "10%"
+    },
+    logo: {
+        height: "20%",
+        marginBottom: 20
+    },
+    loginInput: {
+
+    },
+    loginButton: {
+        marginHorizontal: 10
+    }
+}));
+
+export default createAppStyles;
