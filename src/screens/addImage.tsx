@@ -22,7 +22,7 @@ import {
 
 } from 'react-native-svg';
 
-import { Button, Tile, Tooltip, TooltipProps, Input, Icon, useTheme } from '@rneui/themed';
+import { Button, Tile, Tooltip, TooltipProps, Input, Icon, useTheme, Dialog } from '@rneui/themed';
 
 import React, { useState, useEffect, useCallback } from 'react';
 
@@ -70,6 +70,12 @@ const AddImageScreen = (props: any) => {
     const dispatch = useDispatch();
 
     const theme = useTheme();
+
+    const [dialogVisible, setDialogVisible] = useState(false);
+
+    const toggleDialog = () => {
+        setDialogVisible(!dialogVisible);
+    }
 
     const pickImageButton = useCallback((type: string, options: ImageLibraryOptions | CameraOptions) => {
         if (type == "library") {
@@ -204,7 +210,37 @@ const AddImageScreen = (props: any) => {
                 {/* <ScrollView>
             <Text>{JSON.stringify(response, null, 2)}</Text>
             </ScrollView> */}
-
+                <Dialog
+                    isVisible={dialogVisible}
+                    onBackdropPress={toggleDialog}
+                >
+                    <Dialog.Title title="" />
+                    <Text>How do you want to pick the image?</Text>
+                    <Dialog.Actions>
+                        <Dialog.Button 
+                            title="Image Gallery" 
+                            onPress={() => {
+                                toggleDialog();
+                                pickImageButton('library', {
+                                    selectionLimit: 1,
+                                    mediaType: 'photo',
+                                    includeBase64: false,
+                                });
+                            }} 
+                        />
+                        <Dialog.Button 
+                            title="Camera" 
+                            onPress={() => {
+                                toggleDialog();
+                                pickImageButton('capture', {
+                                    selectionLimit: 1,
+                                    mediaType: 'photo',
+                                    includeBase64: false,
+                                });
+                            }} 
+                        />
+                    </Dialog.Actions>
+                </Dialog>
                 {!response?.assets ? (
                     <View style={{ flex: 1, justifyContent: 'center' }}>
 
@@ -214,12 +250,8 @@ const AddImageScreen = (props: any) => {
                             type="solid"
                             title="Select image"
                             onPress={
-                                () =>
-                                    pickImageButton('library', {
-                                        selectionLimit: 1,
-                                        mediaType: 'photo',
-                                        includeBase64: false,
-                                    })
+                                () => toggleDialog()
+                                    
                             }>
                         </Button>
                     </View>

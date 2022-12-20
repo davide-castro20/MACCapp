@@ -154,7 +154,7 @@ const Post = (props: any) => {
                 </ListItem.Content>
             </ListItem>
 
-            <Overlay isVisible={overlayVisible} onBackdropPress={toggleOverlay} overlayStyle={{ width: (windowWidth * 0.85), ...styles.overlayStyle }}>
+            <Overlay isVisible={overlayVisible} backdropStyle={{backgroundColor:'black', opacity: 0.75}} onBackdropPress={toggleOverlay} overlayStyle={{ width: (windowWidth * 0.85), ...styles.overlayStyle }}>
                 <View onLayout={onLayoutOverlay} style={{ width: "100%" }}>
                     <Image
                         containerStyle={{ ...styles.imageContainer, width: overlayWidth, height: overlayHeight, ...styles.overlayImageContainer }}

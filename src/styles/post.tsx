@@ -37,7 +37,6 @@ const postStyles = makeStyles((theme: ThemeOptions) => ({
     overlayImageContainer: {
     },
     overlayStyle: {
-        backgroundColor:'transparent', 
         padding: 0,
         borderRadius: 8,
         elevation: 5,

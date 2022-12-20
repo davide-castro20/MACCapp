@@ -48,9 +48,9 @@ const HomeScreen = (props: any) => {
         getPosts(user, userData);
     }, [userData]);
 
-    const refreshPosts = useCallback(() => {
+    const refreshPosts =    () => {
         getPosts(user, userData);
-    }, []);
+    };
 
     async function getPosts(user: any, userData: any) {
         if (!user) return;
