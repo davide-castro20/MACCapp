@@ -18,6 +18,7 @@ import {
     ClipPath,
     Defs,
     Circle,
+    Text as TextSVG
 
 } from 'react-native-svg';
 
@@ -38,10 +39,7 @@ import { Face } from '../types';
 import { useDispatch, useSelector } from 'react-redux';
 import { setNewImage, setNewLabels, setNewFaces, setImagePreview } from '../redux/newPost';
 
-type ImageDimensions = {
-    width: number,
-    height: number,
-}
+import { ImageDimensions } from '../types';
 
 type FacesOffset = {
     vertical: number,
@@ -311,13 +309,16 @@ const AddImageScreen = (props: any) => {
                                                             }} />
                                                         {
                                                             activeFace == face.id &&
-                                                            <Text
+                                                            <TextSVG
                                                                 x={((face.centerX * (1 - (facesOffset.horizontal / 100))) + Math.round(facesOffset.horizontal / 2)) + "%"}
                                                                 y={(((face.top * (1 - (facesOffset.vertical / 100))) + Math.round(facesOffset.vertical / 2)) - 1) + "%"}
-                                                                stroke="#000" fill="#000" textAnchor="middle" strokeWidth={1.5}
-                                                                opacity={0.4}
+                                                                stroke="#000" fill="#fff" textAnchor="middle" strokeWidth={0.8}
+                                                                fillOpacity={1}
+                                                                opacity={0.7}
                                                                 fontSize={20}
-                                                            >{face.user.username}</Text>
+                                                            >
+                                                                {face.user.username}
+                                                            </TextSVG>
                                                         }
                                                     </View>
 
@@ -341,7 +342,7 @@ const AddImageScreen = (props: any) => {
                             <Input
                                 placeholder='Username...'
                                 value={nameInput}
-                                inputStyle={{ color: "#000" }}
+                                inputStyle={{ color: theme.theme.colors.black }}
                                 onChangeText={value => {
                                     setNameInput(value);
                                     checkUser(value);

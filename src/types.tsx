@@ -12,3 +12,8 @@ export type Face = {
     centerX: number,
     centerY: number
 }
+
+export type ImageDimensions = {
+    width: number,
+    height: number,
+}
