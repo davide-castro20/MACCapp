@@ -262,7 +262,7 @@ const App = () => {
                       })} />
                     <Stack.Screen name="Search" component={SearchScreen}
                       options={({ navigation }) => ({
-                        headerTitle: "Search posts",
+                        headerTitle: "Search",
                         headerStyle: styles.header,
                         headerTitleStyle: styles.headerTitle,
                         headerLeft: () => (

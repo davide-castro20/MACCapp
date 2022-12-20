@@ -111,8 +111,6 @@ const AddImageScreen = (props: any) => {
         .where('username', '==', username)
         .get()
         .then(querySnapshot => {
-            console.log(querySnapshot);
-
             if (querySnapshot.size > 0) {
 
                 setInputUserId(querySnapshot.docs[0].id);
