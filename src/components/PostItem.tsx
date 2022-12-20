@@ -93,7 +93,10 @@ const Post = (props: any) => {
     return (
         <>
             <ListItem bottomDivider containerStyle={styles.itemContainer} >
-                <Avatar source={{ uri: photo }} rounded={true} containerStyle={{ alignSelf: 'flex-start', marginTop: 5 }} />
+                <Avatar 
+                    source={{ uri: photo }} 
+                    rounded={true} 
+                    containerStyle={{ alignSelf: 'flex-start', marginTop: 5 }} />
                 <ListItem.Content style={{ width: "100%", paddingRight: "10%"}}>
                     <ListItem.Title style={styles.header}>
                         <Text style={styles.name}>{post.creator.firstName} {post.creator.lastName}</Text>
