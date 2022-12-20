@@ -25,11 +25,21 @@ const createSearchStyles = makeStyles((theme: ThemeOptions) => ({
         height: 2
     },
     postTab: {
-        
+        flex: 1,
     },
     userTab: {
-
-    }
+        flex: 1,
+    },
+    emptyList: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        color: theme.colors.black,
+    },
+    emptyListText: {
+        color: theme.colors.black,
+        fontSize: 20,
+    },
 }));
 
 export default createSearchStyles;

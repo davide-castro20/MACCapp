@@ -113,6 +113,7 @@ const CreatePostScreen = (props: any) => {
             let post = {
                 creator: auth().currentUser?.uid,
                 text: postText,
+                textWords: postText.split(' '),
                 tags: labels,
                 faces: faces,
                 creation_date: firestore.FieldValue.serverTimestamp(),

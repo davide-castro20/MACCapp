@@ -134,8 +134,7 @@ const App = () => {
     firestore()
       .collection('users')
       .doc(user.uid)
-      .get()
-      .then(async newUserData => {
+      .onSnapshot(async newUserData => {
 
         let userDataDocument = newUserData.data();
         if (!userDataDocument.photoURL || userDataDocument.photoURL == "") {

@@ -7,7 +7,7 @@ const newPostSlice = createSlice({
         image: null,
         imagePreview: null,
         labels: null,
-        faces: ["wow"],
+        faces: null,
     },
     reducers: {
         imageAdded: (state, action) => {

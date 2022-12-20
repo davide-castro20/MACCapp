@@ -1,6 +1,8 @@
 import React, { type PropsWithChildren, useState, useEffect, RefObject, useCallback } from 'react';
 
 import {
+    ActivityIndicator,
+    FlatList,
     View,
 } from 'react-native';
 
@@ -17,6 +19,8 @@ import createSearchStyles from '../styles/search';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 
+import PostItem from '../components/PostItem';
+import UserItem from '../components/UserItem';
 
 
 const SearchScreen = (props: any) => {
@@ -38,70 +42,117 @@ const SearchScreen = (props: any) => {
 
     async function getPosts() {
 
-        // setLoadingPosts(true);
+        setLoadingPosts(true);
 
-        // return firestore()
-        //     .collection('posts')
-        //     .where('creator', '==', user.uid)
-        //     //.where('creator', 'in', userData.following)
-        //     .orderBy('creation_date', 'desc')
-        //     .onSnapshot(postsSnapshot => {
-        //         let newPosts: any = [];
-        //         let postPromises: Promise<void | FirebaseFirestoreTypes.DocumentSnapshot<FirebaseFirestoreTypes.DocumentData>>[] = [];
+        let postsByTags: any = [];
+        let postsByText: any = [];
 
-        //         postsSnapshot.forEach(postSnap => {
-        //             let postData = postSnap.data();
+        let postPromises: Promise<void | FirebaseFirestoreTypes.DocumentSnapshot<FirebaseFirestoreTypes.DocumentData>>[] = [];
 
+        postPromises.push(firestore()
+            .collection('posts')
+            .where('tags', 'array-contains', searchText)
+            .get()
+            .then(postDocs => {
+                let newPosts: any = [];
+                
+                postDocs.forEach(postDoc => {
+                    let postData = postDoc.data();
+                    if (postData.creation_date) {
+                        postData.creation_date = postData.creation_date.toDate();
+                    }
+                    postsByTags = [...newPosts, postData];
+                });
+            }));
 
-        //             // In the case the post is just created, the date is not available yet in the first snapshot 
-        //             // because it is created by firebase serverside
-        //             if (postData.creation_date) {
-        //                 postData.creation_date = postData.creation_date.toDate();
-        //             }
+        postPromises.push(firestore()
+            .collection('posts')
+            .where('textWords', 'array-contains-any', searchText.split(' '))
+            .get()
+            .then(postDocs => {
+                let newPosts: any = [];
+                postDocs.forEach(postDoc => {
+                    let postData = postDoc.data();
+                    if (postData.creation_date) {
+                        postData.creation_date = postData.creation_date.toDate();
+                    }
+                    postsByText = [...newPosts, postData];
+                });
+            })
+        )
 
-        //             postPromises.push(
-        //                 firestore()
-        //                     .collection('users')
-        //                     .doc(postData.creator)
-        //                     .get()
-        //                     .then(async postCreator => {
+        return Promise.all(postPromises).then(() => {
 
-        //                         if (postData.image && postData.image != "") {
-        //                             const postImageUrl = await storage().ref(postData.image).getDownloadURL();
-        //                             postData.image = postImageUrl;
-        //                         }
+            let c = postsByTags.concat(postsByText);
+            let postsSet = c.filter((item, pos) => c.indexOf(item) === pos);
 
-        //                         postData.creator = postCreator.data();
-        //                         const profilePicUrl = await storage().ref(postData.creator.photoURL).getDownloadURL();
-        //                         postData.creator.photoURL = profilePicUrl;
-        //                         newPosts = [...newPosts, postData];
-        //                     }));
-        //         });
+            postsSet.sort(function (a, b) {
+                return parseFloat(b.creation_date) - parseFloat(a.creation_date);
+            });
 
-        //         Promise.all(postPromises).then(() => {
-        //             setPosts(newPosts);
-        //             setLoadingPosts(false);
-        //         })
-        //     });
+            let postUserPromises: Promise<void | FirebaseFirestoreTypes.DocumentSnapshot<FirebaseFirestoreTypes.DocumentData>>[] = [];
+
+            postsSet.forEach(postData => {
+                postUserPromises.push(
+                    firestore()
+                        .collection('users')
+                        .doc(postData.creator)
+                        .get()
+                        .then(async postCreator => {
+
+                            if (postData.image && postData.image != "") {
+                                const postImageUrl = await storage().ref(postData.image).getDownloadURL();
+                                postData.image = postImageUrl;
+                            }
+
+                            postData.creator = postCreator.data();
+                            const profilePicUrl = await storage().ref(postData.creator.photoURL).getDownloadURL();
+                            postData.creator.photoURL = profilePicUrl;
+                        }));
+            })
+
+            Promise.all(postUserPromises).then(() => {
+                setPosts(postsSet);
+                setLoadingPosts(false);
+            })
+        })
     }
 
     async function getUsers() {
-        // firestore()
-        // .collection('users')
-        // .doc(postData.creator)
-        // .get()
-        // .then(async postCreator => {
 
-        //     if (postData.image && postData.image != "") {
-        //         const postImageUrl = await storage().ref(postData.image).getDownloadURL();
-        //         postData.image = postImageUrl;
-        //     }
+        setLoadingUsers(true);
 
-        //     postData.creator = postCreator.data();
-        //     const profilePicUrl = await storage().ref(postData.creator.photoURL).getDownloadURL();
-        //     postData.creator.photoURL = profilePicUrl;
-        //     newPosts = [...newPosts, postData];
-        // }));
+        firestore()
+            .collection('users')
+            .where('username', '==', searchText)
+            .onSnapshot(async usersDocs => {
+
+                let newUsers: any = [];
+
+                let userPromises: Promise<void>[] = [];
+                usersDocs.forEach(userDoc => {
+
+                    let promise = new Promise<void>(async (resolve, reject) => {
+                        let userData = userDoc.data();
+    
+    
+                        const profilePicUrl = await storage().ref(userData.photoURL).getDownloadURL();
+                        userData.photoURL = profilePicUrl;
+                        
+                        userData.uid = userDoc.id;
+
+                        newUsers = [...newUsers, userData];
+                        resolve();
+                    });
+
+                    userPromises.push(promise);
+                })
+
+                Promise.all(userPromises).then(() => {
+                    setUsers(newUsers);
+                    setLoadingUsers(false);
+                });
+            });
     }
 
     const newSearch = () => {
@@ -111,6 +162,8 @@ const SearchScreen = (props: any) => {
         getPosts();
         getUsers();
     };
+
+    const keyExtractor = (_item: any, index: number) => index.toString();
 
     return (
         <View style={styles.page}>
@@ -126,42 +179,69 @@ const SearchScreen = (props: any) => {
             />
 
             {
-                ((loadingPosts || loadingUsers) || (posts.length == 0 && users.length == 0)) ? (
-                    <>
-                    </>
-                ) : (
-                    <>
-                        <Tab
-                            value={index}
-                            onChange={(e) => setIndex(e)}
+                // ((loadingPosts || loadingUsers) || (posts.length == 0 && users.length == 0)) ? (
+                (loadingPosts || loadingUsers) ? (
+                    <ActivityIndicator />
+                ) :
+                    (
+                        (posts.length == 0 && users.length == 0) ?
+                            (
+                                <>
+                                </>
+                            ) : (
+                                <>
+                                    <Tab
+                                        value={index}
+                                        onChange={(e) => setIndex(e)}
 
-                            indicatorStyle={styles.tabIndicator}
-                            variant="primary"
+                                        indicatorStyle={styles.tabIndicator}
+                                        variant="primary"
 
-                        >
-                            <Tab.Item
-                                icon={{ name: 'list', size: 18, type: 'font-awesome-5', color: 'white' }}
-                                containerStyle={styles.tabItem}
-                                buttonStyle={{ height: 45 }}
-                            />
-                            <Tab.Item
-                                icon={{ name: 'user-alt', size: 18, type: 'font-awesome-5', color: 'white' }}
-                                containerStyle={styles.tabItem}
-                                buttonStyle={{ height: 45 }}
-                            />
-                        </Tab>
+                                    >
+                                        <Tab.Item
+                                            icon={{ name: 'list', size: 18, type: 'font-awesome-5', color: theme.theme.colors.black }}
+                                            containerStyle={styles.tabItem}
+                                            buttonStyle={{ height: 45 }}
+                                        />
+                                        <Tab.Item
+                                            icon={{ name: 'user-alt', size: 18, type: 'font-awesome-5', color: theme.theme.colors.black }}
+                                            containerStyle={styles.tabItem}
+                                            buttonStyle={{ height: 45 }}
+                                        />
+                                    </Tab>
 
 
-                        <TabView value={index} onChange={setIndex} animationType="spring">
-                            <TabView.Item style={styles.postTab}>
-                                <Text h1>Recent</Text>
-                            </TabView.Item>
-                            <TabView.Item style={styles.userTab}>
-                                <Text h1>Favorite</Text>
-                            </TabView.Item>
-                        </TabView>
-                    </>
-                )
+                                    <TabView value={index} onChange={setIndex} animationType="spring">
+                                        <TabView.Item style={styles.postTab}>
+                                            <FlatList
+                                                keyExtractor={keyExtractor}
+                                                contentContainerStyle={{ flexGrow: 1 }}
+                                                data={posts}
+                                                renderItem={(postItem) => { return <PostItem post={postItem.item} /> }}
+                                                ListEmptyComponent={(
+                                                    <View style={styles.emptyList}>
+                                                        <Text style={styles.emptyListText}>No posts that match your search.</Text>
+                                                    </View>
+                                                )}
+                                            />
+                                        </TabView.Item>
+                                        <TabView.Item style={styles.userTab}>
+                                            <FlatList
+                                                keyExtractor={keyExtractor}
+                                                contentContainerStyle={{ flexGrow: 1 }}
+                                                data={users}
+                                                renderItem={(userItem) => { return <UserItem user={userItem.item} /> }}
+                                                ListEmptyComponent={(
+                                                    <View style={styles.emptyList}>
+                                                        <Text style={styles.emptyListText}>No users that match your search.</Text>
+                                                    </View>
+                                                )}
+                                            />
+                                        </TabView.Item>
+                                    </TabView>
+                                </>
+                            )
+                    )
             }
 
         </View>
