@@ -126,7 +126,7 @@ const CreatePostScreen = (props: any) => {
             firestore()
                 .collection('posts')
                 .add(post)
-                .then(() => {
+                .finally(() => {
                     console.log('Post added!');
                     dispatch(resetNewPost());
                     setCreatingPost(false);

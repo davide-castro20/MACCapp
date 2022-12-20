@@ -65,8 +65,9 @@ const HomeScreen = (props: any) => {
         return firestore()
             .collection('posts')
             .where('creator', '==', user.uid)
+            // .orderBy('creation_date', 'desc') // onsnapshot does not work with the orderby because the date is not immediately available
             //.where('creator', 'in', userData.following)
-            .orderBy('creation_date', 'desc')
+            // .orderBy('creation_date', 'desc')
             .onSnapshot(postsSnapshot => {
                 let newPosts: any = [];
                 let postPromises: Promise<void | FirebaseFirestoreTypes.DocumentSnapshot<FirebaseFirestoreTypes.DocumentData>>[] = [];
@@ -74,12 +75,13 @@ const HomeScreen = (props: any) => {
                 postsSnapshot?.forEach(postSnap => {
                     let postData = postSnap.data();
 
-              
+                    
                     // In the case the post is just created, the date is not available yet in the first snapshot 
                     // because it is created by firebase serverside
                     if (postData.creation_date) {
                         postData.creation_date = postData.creation_date.toDate();
                     }
+
 
                     postPromises.push(
                         firestore()
@@ -101,6 +103,15 @@ const HomeScreen = (props: any) => {
                 });
 
                 Promise.all(postPromises).then(() => {
+
+                    newPosts.sort(function(a, b) {
+                        if (a.creation_date == null)
+                            return -1;
+                        else if (b.creation_date == null) 
+                            return 1;
+                        else
+                            return new Date(b.creation_date) - new Date(a.creation_date);
+                    });
                     setPosts(newPosts);
                     setLoadingPosts(false);
                 })

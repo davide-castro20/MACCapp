@@ -148,6 +148,7 @@ const SearchScreen = (props: any) => {
                     userPromises.push(promise);
                 })
 
+
                 Promise.all(userPromises).then(() => {
                     setUsers(newUsers);
                     setLoadingUsers(false);
@@ -181,7 +182,12 @@ const SearchScreen = (props: any) => {
             {
                 // ((loadingPosts || loadingUsers) || (posts.length == 0 && users.length == 0)) ? (
                 (loadingPosts || loadingUsers) ? (
-                    <ActivityIndicator />
+                    <View style={{flexGrow: 1, justifyContent: 'center'}}>
+                        <ActivityIndicator
+                        color={theme.theme.colors.primary}
+                        size={50}
+                        />   
+                    </View>
                 ) :
                     (
                         (posts.length == 0 && users.length == 0) ?
