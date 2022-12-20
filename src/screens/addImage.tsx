@@ -18,11 +18,10 @@ import {
     ClipPath,
     Defs,
     Circle,
-    Text,
 
 } from 'react-native-svg';
 
-import { Button, Tile, Tooltip, TooltipProps, Input, Icon, useTheme, Dialog } from '@rneui/themed';
+import { Button, Tile, Tooltip, TooltipProps, Input, Icon, useTheme, Dialog, Text } from '@rneui/themed';
 
 import React, { useState, useEffect, useCallback } from 'react';
 
@@ -213,12 +212,14 @@ const AddImageScreen = (props: any) => {
                 <Dialog
                     isVisible={dialogVisible}
                     onBackdropPress={toggleDialog}
+                    overlayStyle={{backgroundColor: theme.theme.mode == "dark" ? theme.theme.colors.grey5 : 'white'}}
                 >
-                    <Dialog.Title title="" />
-                    <Text>How do you want to pick the image?</Text>
+                    <Text style={{color: theme.theme.colors.black}}>How do you want to pick the image?</Text>
                     <Dialog.Actions>
                         <Dialog.Button 
                             title="Image Gallery" 
+                            titleStyle={{color: theme.theme.colors.primary}}
+                            icon={{name: 'image', type: 'font-awesome-5', color: theme.theme.colors.primary}}
                             onPress={() => {
                                 toggleDialog();
                                 pickImageButton('library', {
@@ -230,6 +231,8 @@ const AddImageScreen = (props: any) => {
                         />
                         <Dialog.Button 
                             title="Camera" 
+                            titleStyle={{color: theme.theme.colors.primary}}
+                            icon={{name: 'camera', type: 'font-awesome-5', color: theme.theme.colors.primary}}
                             onPress={() => {
                                 toggleDialog();
                                 pickImageButton('capture', {
