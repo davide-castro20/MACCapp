@@ -18,7 +18,7 @@ import firestore from '@react-native-firebase/firestore';
 
 import createPostStyles from '../../src/styles/createPost';
 
-import Geolocation from '@react-native-community/geolocation';
+import Geolocation, { GeolocationResponse } from '@react-native-community/geolocation';
 
 import { getLocationName } from '../location';
 
@@ -93,69 +93,80 @@ const CreatePostScreen = (props: any) => {
 
 
         Geolocation.getCurrentPosition(async info => {
-
-            console.log(info)
-
-            // let location = await getLocationName(info.coords.latitude, info.coords.longitude);
-            // location = location ? JSON.parse(location) : null;
-
-
-            let imageReference = null;
-
-            if (image) {
-                let imageUUID = uuidv4();
-                imageReference = storage().ref(`post_images/${imageUUID}.png`);
-                const pathToFile = image;
-
-                await imageReference.putFile(pathToFile);
-            }
-
-            let post = {
-                creator: auth().currentUser?.uid,
-                text: postText,
-                textWords: postText.split(' '),
-                tags: labels,
-                faces: faces,
-                creation_date: firestore.FieldValue.serverTimestamp(),
-                image: imageReference ? imageReference.fullPath : null,
-                // location: location ? location['formatted_address'] : null,
-            };
-
-            console.log(post);
-
-            firestore()
-                .collection('posts')
-                .add(post)
-                .finally(() => {
-                    console.log('Post added!');
-                    dispatch(resetNewPost());
-                    setCreatingPost(false);
-
-                    Toast.show({
-                        type: 'success',
-                        text1: 'Post created successfuly',
-                    });
-                    props.navigation.goBack();
-                });
+            publishPost(info);
         },
-            error => {
-                console.log(error);
+        error => {
+            console.log(error);
+    
+            // Toast.show({
+            //     type: 'error',
+            //     text1: 'Error creating post',
+            //     text2: 'Please try again later',
+            // });
+
+            publishPost(null);
+    
+    
+            // setCreatingPost(false);
+        },
+        {
+            maximumAge: 0,
+            timeout: 20000,
+            enableHighAccuracy: false,
+        });
+            
+    };
+
+    const publishPost = async (locationInfo: null | GeolocationResponse) => {
+        console.log(locationInfo)
+
+        let location = null;
+        
+        if (locationInfo != null) {
+            // location = await getLocationName(locationInfo.coords.latitude, locationInfo.coords.longitude);
+            // location = location ? JSON.parse(location) : null;
+        }
+
+        let imageReference = null;
+
+        if (image) {
+            let imageUUID = uuidv4();
+            imageReference = storage().ref(`post_images/${imageUUID}.png`);
+            const pathToFile = image;
+
+            await imageReference.putFile(pathToFile);
+        }
+
+        let post = {
+            creator: auth().currentUser?.uid,
+            text: postText,
+            textWords: postText.split(' '),
+            tags: labels,
+            faces: faces,
+            creation_date: firestore.FieldValue.serverTimestamp(),
+            image: imageReference ? imageReference.fullPath : null,
+            // location: location ? location['formatted_address'] : null,
+        };
+
+        console.log(post);
+
+        firestore()
+            .collection('posts')
+            .add(post)
+            .finally(() => {
+                console.log('Post added!');
+                dispatch(resetNewPost());
+                setCreatingPost(false);
 
                 Toast.show({
-                    type: 'error',
-                    text1: 'Error creating post',
-                    text2: 'Please try again later',
+                    type: 'success',
+                    text1: 'Post created successfuly',
+                    text2: 'Posted without location'
                 });
-
-
-                setCreatingPost(false);
-            },
-            {
-                maximumAge: 0,
-                timeout: 20000,
-                enableHighAccuracy: true,
+                props.navigation.goBack();
             });
-    };
+    
+    }
 
     return (
         <ScrollView contentContainerStyle={styles.backgroundPage}>
