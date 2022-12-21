@@ -13,12 +13,15 @@ const dynamicModeSlice = createSlice({
         disable: (state) => {
             state.enabled = false;
         },
+        reset: (state) => {
+            state.enabled = false;
+        }
     },
 });
 export default dynamicModeSlice.reducer
 
 // Actions
-const { enable, disable } = dynamicModeSlice.actions;
+const { enable, disable, reset } = dynamicModeSlice.actions;
 
 export const enableDynamicMode = () => async dispatch => {
     try {
@@ -31,6 +34,14 @@ export const enableDynamicMode = () => async dispatch => {
 export const disableDynamicMode = () => async dispatch => {
     try {
         dispatch(disable());
+    } catch (e) {
+        return console.error(e.message);
+    }
+}
+
+export const resetDynamicMode = () => async dispatch => {
+    try {
+        dispatch(reset());
     } catch (e) {
         return console.error(e.message);
     }

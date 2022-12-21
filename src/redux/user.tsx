@@ -14,8 +14,9 @@ const userSlice = createSlice({
         userDataSucess: (state, action) => {
             state.userData = action.payload.userData;
         },
-        logoutSuccess: (state, action) => {
+        logoutSuccess: (state) => {
             state.userData = null;
+            state.user = null;
         },
     },
 });

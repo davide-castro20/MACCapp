@@ -8,7 +8,7 @@ import {
     ScrollView,
 } from 'react-native';
 
-import { ListItem, Avatar, SpeedDial, Icon, Switch, useThemeMode, ThemeMode, Divider, useTheme } from '@rneui/themed'
+import { ListItem, Avatar, SpeedDial, Icon, Switch, useThemeMode, ThemeMode, Divider, useTheme, Button } from '@rneui/themed'
 
 import React, { useState, useEffect, useCallback } from 'react';
 
@@ -22,9 +22,12 @@ import PostItem from '../components/PostItem';
 import styles from '../../src/styles/style';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { enableDynamicMode, disableDynamicMode } from '../redux/dynamicMode';
+import { enableDynamicMode, disableDynamicMode, resetDynamicMode } from '../redux/dynamicMode';
 
 import createUserMenuStyles from '../styles/userMenu';
+
+import { unsetUser } from '../redux/user';
+
 
 const UserMenuScreen = (props: any) => {
 
@@ -51,6 +54,17 @@ const UserMenuScreen = (props: any) => {
     useEffect(() => {
         getPosts(currentUser.user, userData);
     }, [userData]);
+
+    const signout = () => {
+        auth()
+        .signOut()
+        .then(() => {
+            console.log("Sign out");
+            dispatch(unsetUser());
+            dispatch(resetDynamicMode);
+            props.navigation.goBack();
+        })
+    }
 
     async function getPosts(user: any, userData: any) {
         if (!user) return;
@@ -183,6 +197,20 @@ const UserMenuScreen = (props: any) => {
                             value={mode == 'dark'}
                             disabled={dynamicMode}
                         />
+                    </View>
+
+                    <Divider color={theme.theme.colors.grey4} width={1} />
+
+                    <View style={styles.signoutOption}>
+                        <Button
+                            color={theme.theme.colors.error}
+                            type='outline'
+                            buttonStyle={{borderColor: theme.theme.colors.error}}
+                            titleStyle={{color: theme.theme.colors.error}}
+                            onPress={() => signout()}
+                        >
+                        Sign out    
+                        </Button>
                     </View>
                 </View>
                 <Divider color={theme.theme.colors.grey4} width={3} />

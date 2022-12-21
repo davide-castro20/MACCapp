@@ -105,8 +105,6 @@ const CreatePostScreen = (props: any) => {
             // });
 
             publishPost(null);
-    
-    
             // setCreatingPost(false);
         },
         {

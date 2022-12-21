@@ -57,8 +57,8 @@ const createUserMenuStyles = makeStyles((theme: ThemeOptions) => ({
     darkOption: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingVertical: 10,
-        marginBottom: 15
+        marginTop: 5,
+        paddingVertical: 10
     },
     optionText: {
         textAlignVertical: 'center',
@@ -94,6 +94,12 @@ const createUserMenuStyles = makeStyles((theme: ThemeOptions) => ({
         alignItems: 'center',
         color: theme.colors.black,
     },
+    signoutOption: {
+        flexDirection: 'row',
+        paddingVertical: 10,
+        marginTop: 5,
+        marginBottom: 15,
+    }
 }));
 
 export default createUserMenuStyles;

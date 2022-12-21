@@ -123,13 +123,15 @@ const App = () => {
         uid: user.uid,
       };
       dispatch(setUser(userStore));
-      if (loadingUser) getUserData(user);
+      if (!loadingUser) getUserData(user);
     }
     if (initializing) setInitializing(false);
   }
 
   function getUserData(user: any) {
     if (!user) return;
+
+    setLoadingUser(true);
 
     firestore()
       .collection('users')
@@ -162,9 +164,7 @@ const App = () => {
       })
       .catch(error => {
         console.log(error);
-        emailInput.current.shake();
-        passInput.current.clear();
-        passInput.current.shake();
+        setPassword("");
         setLoggingIn(false);
         Toast.show({
           type: 'error',
@@ -211,6 +211,7 @@ const App = () => {
                   placeholder="Password."
                   placeholderTextColor="#003f5c"
                   secureTextEntry={true}
+                  value={password}
                   onChangeText={password => setPassword(password)}
                 />
               </View>
@@ -225,7 +226,7 @@ const App = () => {
           ) :
             (
               (!user && signUp) ? (
-                <Signup/>
+                <Signup setSignUp={setSignUp}/>
               ) : (
                 (userData && !loadingUser) ? (
                   <Stack.Navigator>

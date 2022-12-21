@@ -9,6 +9,7 @@ const rootReducer = combineReducers(
     { user, newPost, dynamicMode }
 );
 
+
 const buildStore = () => {
     return configureStore({
         reducer: 
