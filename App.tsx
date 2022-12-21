@@ -112,7 +112,6 @@ const App = () => {
 
   // Handle user state changes
   function onAuthStateChanged(user: any) {
-
     if (user) {
       let userStore = {
         displayName: user.displayName,
@@ -123,7 +122,7 @@ const App = () => {
         uid: user.uid,
       };
       dispatch(setUser(userStore));
-      if (!loadingUser) getUserData(user);
+      getUserData(user);
     }
     if (initializing) setInitializing(false);
   }
@@ -137,7 +136,7 @@ const App = () => {
       .collection('users')
       .doc(user.uid)
       .onSnapshot(async newUserData => {
-
+        console.log(newUserData)
         let userDataDocument = newUserData.data();
         if (!userDataDocument.photoURL || userDataDocument.photoURL == "") {
           userDataDocument.photoURL = Image.resolveAssetSource(DEFAULT_AVATAR).uri;

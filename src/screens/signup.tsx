@@ -147,18 +147,30 @@ const Signup = (props: any) => {
                         
                         let newUser = user.user;
 
-                        let profileImage = profilePic == defaultAddAvatar ?
-                            Image.resolveAssetSource(DEFAULT_AVATAR).uri
-                            :
-                            profilePic;
+                        let noPic = profilePic == defaultAddAvatar;
 
+                        let imageReference = null;
 
-                        let imageUUID = uuidv4();
-                        let imageReference = storage().ref(`post_images/${imageUUID}.png`);
-                        const pathToFile = profileImage;
+                        if (!noPic) {
+                            let imageUUID = uuidv4();
+                            let imageReference = storage().ref(`profile_pics/${imageUUID}.png`);
+                            const pathToFile = profilePic;
 
-                        await imageReference.putFile(pathToFile);
-                        
+                            await imageReference.putFile(pathToFile);
+
+                            if (imageReference == null)
+                            {
+                                newUser
+                                .delete()
+                                .then(() => {
+                                    Toast.show({
+                                        type: 'error',
+                                        text1: 'There has been a problem signing up.',
+                                        text2: 'Please try again later'
+                                    })
+                                })
+                            }
+                        }
                         
                         firestore()
                             .collection('users')
@@ -170,7 +182,7 @@ const Signup = (props: any) => {
                                     followers: [],
                                     following: [],
                                     username: username,
-                                    photoURL: imageReference ? imageReference.fullPath : null
+                                    photoURL: noPic ? "profile_pics/default.png" : imageReference
                                 }
                             )
                             .then(() => {
@@ -178,7 +190,7 @@ const Signup = (props: any) => {
                                     type: 'success',
                                     text1: 'Signup successful!'
                                 });
-                                setSigningup(false);
+                                props.setSignUp(false);
                                 setUser(newUser);
                             })
                             .catch(error => {
@@ -346,6 +358,9 @@ const Signup = (props: any) => {
                                 :
                                 email != "" && !(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/).test(email) ?
                                     'Invalid e-mail address!'
+                                    :
+                                    emailError ?
+                                    emailError
                                     :
                                     ""
                         }
