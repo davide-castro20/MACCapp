@@ -17,5 +17,16 @@ Project for Mobile Applications and Cloud Computing course in Sapienza Universit
 
 4. Start the application
     ```bash
-    npx npx react-native run-android
+    npx react-native run-android
+    ```
+
+## Build APK
+
+1. Run react-native bundle
+    ```bash
+    npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
+    ```
+2. Assemble android APK. In /android/ run:
+    ```bash
+    ./gradlew assembleDebug
     ```
