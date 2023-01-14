@@ -30,3 +30,4 @@ Project for Mobile Applications and Cloud Computing course in Sapienza Universit
     ```bash
     ./gradlew assembleDebug
     ```
+3. APK is in android/app/build/outputs/apk/debug/app-debug.apk
