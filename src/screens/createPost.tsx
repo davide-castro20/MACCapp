@@ -110,7 +110,7 @@ const CreatePostScreen = (props: any) => {
         {
             maximumAge: 0,
             timeout: 20000,
-            enableHighAccuracy: false,
+            enableHighAccuracy: true,
         });
             
     };
@@ -121,8 +121,8 @@ const CreatePostScreen = (props: any) => {
         let location = null;
         
         if (locationInfo != null) {
-            // location = await getLocationName(locationInfo.coords.latitude, locationInfo.coords.longitude);
-            // location = location ? JSON.parse(location) : null;
+            location = await getLocationName(locationInfo.coords.latitude, locationInfo.coords.longitude);
+            location = location ? JSON.parse(location) : null;
         }
 
         let imageReference = null;
@@ -143,7 +143,7 @@ const CreatePostScreen = (props: any) => {
             faces: faces,
             creation_date: firestore.FieldValue.serverTimestamp(),
             image: imageReference ? imageReference.fullPath : null,
-            // location: location ? location['formatted_address'] : null,
+            location: location ? location['formatted_address'] : null,
         };
 
         console.log(post);
@@ -159,7 +159,7 @@ const CreatePostScreen = (props: any) => {
                 Toast.show({
                     type: 'success',
                     text1: 'Post created successfuly',
-                    text2: 'Posted without location'
+                    text2: locationInfo ? 'Posted with location' : 'Posted without location'
                 });
                 props.navigation.goBack();
             });

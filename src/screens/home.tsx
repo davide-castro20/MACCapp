@@ -62,11 +62,19 @@ const HomeScreen = (props: any) => {
         }
 
 
+        if (!userData.following || userData.following.length == 0) {
+            setPosts([]);
+            setLoadingPosts(false)
+            return;
+        }
+
+        console.log(userData.following)
+
         return firestore()
             .collection('posts')
-            .where('creator', '==', user.uid)
+            // .where('creator', '==', user.uid)
             // .orderBy('creation_date', 'desc') // onsnapshot does not work with the orderby because the date is not immediately available
-            //.where('creator', 'in', userData.following)
+            .where('creator', 'in', userData.following)
             // .orderBy('creation_date', 'desc')
             .onSnapshot(postsSnapshot => {
                 let newPosts: any = [];

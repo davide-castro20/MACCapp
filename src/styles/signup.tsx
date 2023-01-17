@@ -40,7 +40,12 @@ const createSignupStyles = makeStyles((theme: ThemeOptions) => ({
 
     signupButtonContainer: {
         marginTop: 20,
-        marginHorizontal: "12%"
+        marginHorizontal: "12%",
+        marginBottom: 15
+    },
+
+    background: {
+        backgroundColor: "#ffff"
     }
 }));
 

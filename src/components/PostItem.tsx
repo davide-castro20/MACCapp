@@ -233,15 +233,17 @@ const Post = (props: any) => {
                     </ImageBackground>
                     
                 </View>
-                <FAB
-                    visible={true}
-                    onPress={() => setShowingFaces(!showingFaces)}
-                    size={'small'}
-                    placement="right"
-                    containerStyle={{opacity: 0.7, borderWidth: 0.5}}
-                    icon={{ name: 'users', type: 'font-awesome-5', color: showingFaces ? 'black' : 'white', size: 17 }}
-                    color={!showingFaces ? theme.theme.colors.primary : theme.theme.colors.black}
-                />
+                {post.faces && post.faces.length > 0 &&
+                    <FAB
+                        visible={true}
+                        onPress={() => setShowingFaces(!showingFaces)}
+                        size={'small'}
+                        placement="right"
+                        containerStyle={{opacity: 0.7, borderWidth: 0.5}}
+                        icon={{ name: 'users', type: 'font-awesome-5', color: showingFaces ? 'black' : 'white', size: 17 }}
+                        color={!showingFaces ? theme.theme.colors.primary : theme.theme.colors.black}
+                    />
+                }
             </Overlay>
         </>
     );

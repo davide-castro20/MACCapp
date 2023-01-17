@@ -153,11 +153,13 @@ const Signup = (props: any) => {
 
                         if (!noPic) {
                             let imageUUID = uuidv4();
-                            let imageReference = storage().ref(`profile_pics/${imageUUID}.png`);
+                            imageReference = storage().ref(`profile_pics/${imageUUID}.png`);
                             const pathToFile = profilePic;
 
                             await imageReference.putFile(pathToFile);
 
+                            console.log("wrf")
+                            console.log(imageReference);
                             if (imageReference == null)
                             {
                                 newUser
@@ -171,6 +173,8 @@ const Signup = (props: any) => {
                                 })
                             }
                         }
+
+                        console.log("now yes")
                         
                         firestore()
                             .collection('users')
@@ -182,7 +186,7 @@ const Signup = (props: any) => {
                                     followers: [],
                                     following: [],
                                     username: username,
-                                    photoURL: noPic ? "profile_pics/default.png" : imageReference
+                                    photoURL: (noPic || !imageReference) ? "profile_pics/default.png" : imageReference.fullPath
                                 }
                             )
                             .then(() => {
@@ -226,6 +230,7 @@ const Signup = (props: any) => {
     return (
         <ScrollView
             stickyHeaderIndices={[0]}
+            style={styles.background}
         >
             <View style={styles.backButtonView}>
                 <Button

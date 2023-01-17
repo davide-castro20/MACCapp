@@ -131,18 +131,18 @@ const AddImageScreen = (props: any) => {
     const identifyLabels = async (uri: string) => {
         if (uri) {
             try {
-                // const labelsResponse = await labelImage(uri);
+                const labelsResponse = await labelImage(uri);
                 setLabelsReady(true);
 
-                // let newLabels : string[] = [];
+                let newLabels : string[] = [];
 
-                // for (let label of labelsResponse) {
-                //     console.log("Label:");
-                //     console.log(label);
-                //     newLabels = [...newLabels, label.text];
-                // }
+                for (let label of labelsResponse) {
+                    console.log("Label:");
+                    console.log(label);
+                    newLabels = [...newLabels, label.text];
+                }
 
-                // setLabels(newLabels);
+                setLabels(newLabels);
 
             } catch (error) {
                 console.log("Labeling error: " + error);
